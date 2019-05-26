@@ -345,8 +345,7 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
       inputs=bert_inputs,
       signature="tokens",
       as_dict=True)
-  
-   
+
   output_layer = bert_outputs["pooled_output"]
 
   hidden_size = output_layer.shape[-1].value
@@ -363,14 +362,33 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
   index_of_first_token = tf.stack([tf_range, index_of_first_token], axis=1)
   index_of_last_token = tf.stack([tf_range, index_of_last_token], axis=1)
     
+  first_token_output = tf.gather_nd(transformer_outputs, index_of_first_token)
+  last_token_output = tf.gather_nd(transformer_outputs, index_of_last_token)
+
+
+
+  # final output size
+  weight_size_last_sentence = hidden_size * 3
+  layers_for_last_sentence = [weight_size_last_sentence]
+  assert weight_size_last_sentence == layers_for_last_sentence[0]
+  dense_last_sentence = DenseLayer(layers_for_last_sentence)
+
+  segment_ids_expandend_last_sentence = tf.tile(tf.expand_dims(segment_ids, 2), [1, 1, weight_size_last_sentence])
+  segment_ids_expandend_last_sentence = tf.cast(segment_ids_expandend_last_sentence, tf.float32)
+  result_last_sentence = dense_last_sentence(transformer_outputs) * segment_ids_expandend_last_sentence
+
+  output_layer_last_sentence = tf.reduce_sum(result_last_sentence, 1)
+    
+#   output_layer = output_layer_last_sentence
+
 #   =========================================================================================================================
 #   BIDIRECTIONAL 
   # take only last sentences
   last_sentences_transformer_outputs = transformer_outputs * tf.tile(tf.expand_dims(tf.cast(segment_ids, tf.float32), 2), [1, 1, hidden_size])
   # create a list of all LSTM cells we want
   num_layers = 1
-  cells_fw = [tf.nn.rnn_cell.BasicLSTMCell(num_units=hidden_size) for _ in range(num_layers)]
-  cells_bw = [tf.nn.rnn_cell.BasicLSTMCell(num_units=hidden_size) for _ in range(num_layers)]
+  cells_fw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers)]
+  cells_bw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers)]
 
   # we stack the cells together and create one big RNN cell
   cell_fw = tf.nn.rnn_cell.MultiRNNCell(cells_fw)
@@ -380,10 +398,11 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
   inputs = tf.unstack(inputs, num=MAX_SEQ_LENGTH)
 #   inputs = tf.reshape(inputs, [MAX_SEQ_LENGTH, None, hidden_size])
 
-  outputs, output_state_fw, output_state_bw = tf.nn.static_bidirectional_rnn(cell_fw,
-                                                                             cell_bw, 
-                                                                             inputs, 
-                                                                             dtype=tf.float32)
+  with tf.variable_scope("last_sentence"):
+    outputs, output_state_fw, output_state_bw = tf.nn.static_bidirectional_rnn(cell_fw,
+                                                                               cell_bw, 
+                                                                               inputs, 
+                                                                               dtype=tf.float32)
 
   outputs = tf.stack(outputs)
   # outputs size [None, MAX_SEQ_LENGTH, hidden_size * 2]
@@ -392,7 +411,48 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
   first_token_output = tf.gather_nd(outputs, index_of_first_token)
   last_token_output = tf.gather_nd(outputs, index_of_last_token)
   
-  output_layer = tf.concat([first_token_output, last_token_output], 1)
+#   output_layer = tf.concat([first_token_output, last_token_output], 1)
+#   =========================================================================================================================
+
+#   =========================================================================================================================
+#   BIDIRECTIONAL all sentences
+  # take only first sentences
+  first_sentences_transformer_outputs = transformer_outputs * tf.tile(tf.expand_dims(tf.cast(input_mask * (1 - segment_ids), tf.float32), 2), [1, 1, hidden_size])
+  # create a list of all LSTM cells we want
+  
+  num_layers_f = 1
+  cells_fw_f = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_f)]
+  cells_bw_f = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_f)]
+
+  # we stack the cells together and create one big RNN cell
+  cell_fw_f = tf.nn.rnn_cell.MultiRNNCell(cells_fw_f)
+  cell_bw_f = tf.nn.rnn_cell.MultiRNNCell(cells_bw_f)
+    
+  inputs_f = tf.transpose(first_sentences_transformer_outputs, [1, 0, 2])
+  inputs_f = tf.unstack(inputs_f, num=MAX_SEQ_LENGTH)
+#   inputs = tf.reshape(inputs, [MAX_SEQ_LENGTH, None, hidden_size])
+
+  with tf.variable_scope("first_sentences"):
+    outputs_f, output_state_fw_f, output_state_bw_f = tf.nn.static_bidirectional_rnn(cell_fw_f,
+                                                                                     cell_bw_f, 
+                                                                                     inputs_f, 
+                                                                                     dtype=tf.float32)
+
+  outputs_f = tf.stack(outputs_f)
+  # outputs size [None, MAX_SEQ_LENGTH, hidden_size * 2]
+  outputs_f = tf.transpose(outputs, [1, 0, 2])
+    
+  index_of_first_token_f = tf.zeros([tf.shape(transformer_outputs)[0]], dtype=tf.int64)
+  index_of_last_token_f = tf.argmax(segment_ids, axis=1) - 1
+    
+  index_of_first_token_f = tf.stack([tf_range, index_of_first_token_f], axis=1)
+  index_of_last_token_f = tf.stack([tf_range, index_of_last_token_f], axis=1)
+    
+  first_token_output_f = tf.gather_nd(outputs_f, index_of_first_token_f)
+  last_token_output_f = tf.gather_nd(outputs_f, index_of_last_token_f)
+  
+  output_layer = tf.concat([first_token_output, last_token_output, first_token_output_f, last_token_output], 1)
+#   =========================================================================================================================  
 
   with tf.variable_scope("loss"):
 
@@ -494,7 +554,7 @@ SAVE_SUMMARY_STEPS = 100000
 OUTPUT_DIR = 'output_dir'
 SAVE_RESULTS_DIR = 'results_predictions'
 
-N_ESTIMATORS = 50
+N_ESTIMATORS = 25
 
 # Compute # train and warmup steps from batch size
 num_train_steps = int(len(train_features) / REPLICATION_FACTOR / BATCH_SIZE * NUM_TRAIN_EPOCHS)
