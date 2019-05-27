@@ -346,6 +346,7 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
       signature="tokens",
       as_dict=True)
 
+   
   output_layer = bert_outputs["pooled_output"]
 
   hidden_size = output_layer.shape[-1].value
@@ -397,6 +398,58 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
   inputs = tf.transpose(last_sentences_transformer_outputs, [1, 0, 2])
   inputs = tf.unstack(inputs, num=MAX_SEQ_LENGTH)
 #   inputs = tf.reshape(inputs, [MAX_SEQ_LENGTH, None, hidden_size])
+
+  with tf.variable_scope("last_sentence"):
+    outputs, output_state_fw, output_state_bw = tf.nn.static_bidirectional_rnn(cell_fw,
+                                                                               cell_bw, 
+                                                                               inputs, 
+                                                                               dtype=tf.float32)
+
+  outputs = tf.stack(outputs)
+  # outputs size after the transpose [None, MAX_SEQ_LENGTH, hidden_size * 2]
+  outputs = tf.transpose(outputs, [1, 0, 2])
+    
+  first_token_output = tf.gather_nd(outputs, index_of_first_token)
+  last_token_output = tf.gather_nd(outputs, index_of_last_token)
+  
+#   output_layer = tf.concat([first_token_output, last_token_output], 1)
+#   =========================================================================================================================
+
+#   CONV2d
+  
+  outputs = tf.expand_dims(transformer_outputs, 3)
+  # explicitly define the shape of the tensor
+  outputs = tf.reshape(outputs, [-1, MAX_SEQ_LENGTH, hidden_size, 1])
+  
+  conv1 = tf.layers.conv2d(
+        inputs=outputs,
+        filters=32,
+        kernel_size=[5, 5],
+        padding="same",
+        activation=tf.nn.relu)
+
+  pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+
+  conv2 = tf.layers.conv2d(
+        inputs=pool1,
+        filters=32,
+        kernel_size=[4, 6],
+        padding="same",
+        activation=tf.nn.relu)
+
+  pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+
+  conv3 = tf.layers.conv2d(
+        inputs=pool2,
+        filters=16,
+        kernel_size=[4, 6],
+        padding="same",
+        activation=tf.nn.relu)
+
+  pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
+
+  output_layer = tf.reshape(pool3, [-1, pool3.get_shape()[1] * pool3.get_shape()[2] * pool3.get_shape()[3]])
+
 
   with tf.variable_scope("last_sentence"):
     outputs, output_state_fw, output_state_bw = tf.nn.static_bidirectional_rnn(cell_fw,
