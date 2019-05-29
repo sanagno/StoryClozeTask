@@ -8,6 +8,7 @@ Created on Sat May 18 09:47:37 2019
 
 import pandas as pd
 import numpy as np
+import random
 
 # from keras_transformer.attention import MultiHeadAttention 
 #   from skip_thoughts import configuration, encoder_manager
@@ -47,9 +48,9 @@ for i in range(fourth_beg_val.shape[0]):
         wrong_end = val_end_2[i]
     else:
         wrong_end = val_end_1[i]
-        
+
     cosine_similiarities[i] = cosine(fourth_beg_val[i], wrong_end)
-    
+
 # Learn Density of the similarty of fourth and the wrong one.
 kde = KernelDensity(bandwidth=0.1)
 
@@ -63,21 +64,27 @@ end_wrong = np.zeros((rows,4800))
 
 end_wrong_i = np.zeros((rows,))
 
+import time
+start = time.time()
 for i in range(rows):
-# For every story sample a similarity between the fourth and the wrong sentence.
     sample = kde.sample()
     embedding = training[i,3]
-    cosine_similarities_i = np.ones((rows,))
-# Find the fifth sentence (which is not the correct fifth sentence of the story) which 
-# is a similar to the fourth sentence as the sampled similarity
-    for j in range(rows):
-        if i == j: continue
-        cosine_similarities_i[j] = abs(cosine(embedding, train_end[j]) - sample)
+   
+    keep = list(range(rows))
+    random.shuffle(keep)
+    keep_count = 500
+    keep = keep[:keep_count]
+    min_cosine = 10
+    min_cosine_k = 1000
+    for k in keep:
+        if i == k: continue
+        similarity = abs(cosine(embedding, train_end[k]) - sample)
+        if similarity < min_cosine:
+            min_cosine = similarity
+            min_cosine_k = k
     
-# Save the index that corresponds to the fifth sentence wrong sentence
-    end_wrong_i[i] = np.argmin(cosine_similarities_i)
+    end_wrong_i[i] = min_cosine_k
     
-# Now we have essentially bootstrapped a training set like the validation set 
-# For a story i, end_wrong_i[i] corresponds to another story, of which the fifth sentence we
-# we are going to use as the wrong ending of story
+end = time.time()
+print(end - start)
 np.save('wrong_endings.npy', end_wrong_i)
