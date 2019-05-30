@@ -26,14 +26,19 @@ seed = 42
 analyzer = SentimentIntensityAnalyzer()
 roc_df = pd.read_csv(DATA_DIR + '/' + ROC_VAL_SET).drop(columns=['storyid','storytitle'])
 
-def prepare_test_dataset(df):
+def polarity(sentence):
+    '''
+    Convert a sentence to a np.array containing the polarities
+    '''
+    values = analyzer.polarity_scores(sentence).values()
+    return np.array(list(values))
 
+def prepare_test_dataset(df):
+    '''
+    Convert test set to polarity set.
+    '''
     X = []
     Y = []
-    def polarity(sentence):
-        values = analyzer.polarity_scores(sentence).values()
-        return np.array(list(values))
-
     input_sentences = ['InputSentence%d'%i for i in range(1,5)]
     first_sentences = df[input_sentences]
     beginning_polarities = first_sentences.apply(lambda x: np.stack(x.apply(polarity).values), axis=1)
@@ -44,9 +49,6 @@ def prepare_test_dataset(df):
     return X, ending_polarity1, ending_polarity2, correct
 
 def prepare_roc_dataset(df):
-    def polarity(sentence):
-        values = analyzer.polarity_scores(sentence).values()
-        return np.array(list(values))
 
     input_sentences = ['sentence%d'%i for i in range(1,5)]
     first_sentences = df[input_sentences]
@@ -55,19 +57,19 @@ def prepare_roc_dataset(df):
     ending_polarity = ending['sentence5'].apply(polarity)
     X = np.stack(beginning_polarities.values,axis=0)
     Y = np.stack(ending_polarity.values)
+
     return X,Y
 
 X, y = prepare_roc_dataset(roc_df)
-print(y.shape)
-trX, teX, trY, teY = train_test_split(X, y, test_size=0.33, random_state=42)
 
-max_features = 1024
-
+# Define a simple lstm model where the last state corresponds to a representation
+# of the polarity of the sentences.
 model = Sequential()
 model.add(LSTM(128))
 model.add(Dropout(0.1))
 polarity_layer = model.add(Dense(4, activation='softmax'))
 
+# Optimize the model so the polarity of the layer is as close as the correct polarity
 def cosine_similarity_loss(layer):
     # Create a loss function that adds the MSE loss to the mean of all squared activations of a specific layer
     def loss(y_true,y_pred):
@@ -82,15 +84,16 @@ def cosine_similarity_loss(layer):
 model.compile(loss=cosine_similarity_loss(polarity_layer),
               optimizer='adam')
 
-model.fit(trX, trY, batch_size=16, epochs=10)
-score = model.evaluate(teX, teY, batch_size=16)
-print(score)
+model.fit(X, y, batch_size=16, epochs=10, validation_split=0.1)
 
+# Make predictions on the real model
+# The correct sentence is the one with closest polarity to the one predicted by the LSTM
 roc_df = pd.read_csv(DATA_DIR + '/' + VAL_SET).drop(columns=['InputStoryid'])
 X_test, answer1, answer2, y_test = prepare_test_dataset(roc_df)
 
 predictions = model.predict(X_test, batch_size=1)
 correct = 0
+final_predictions = np.array((predictions.shape[0],))
 for i in range(predictions.shape[0]):
     if cosine_similarity(predictions[i].reshape(1,-1), answer1[i].reshape(1,-1)) \
      < cosine_similarity(predictions[i].reshape(1,-1), answer2[i].reshape(1,-1)):
@@ -99,6 +102,9 @@ for i in range(predictions.shape[0]):
         y = 1
     if y == y_test[i]:
         correct+=1
+    final_predictions[i] = y - 1
 
 print(correct/ predictions.shape[0])
 
+#Save predictions
+np.save('sentiment_analysis_predictions.npy', final_predictions)
