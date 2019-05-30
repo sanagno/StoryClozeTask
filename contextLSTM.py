@@ -11,12 +11,10 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Input, Dropout, Lambda, GRU, Softmax
 from keras.layers import Flatten, Concatenate, TimeDistributed, Layer
-from keras.layers import Embedding
 from keras.optimizers import SGD, Adam
 from keras.losses import categorical_crossentropy, sparse_categorical_crossentropy
 import keras.backend as KB
 from sklearn.model_selection import train_test_split
-from keras.callbacks import ModelCheckpoint
 from sklearn.metrics.pairwise import cosine_similarity
 
 from sklearn.metrics import accuracy_score
