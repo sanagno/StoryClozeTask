@@ -32,10 +32,10 @@ class NLUModel():
         '''
         pass
 
-    def fit(X, y, epochs=10, batch_size=32):
+    def fit(self, X, y, epochs=10, batch_size=32):
         pass
 
-    def predict(X):
+    def predict(self, X):
         '''
         Returns: a np.array of shape(valdiation_set.shape[0],) with the
         predictions of the model. 
@@ -43,7 +43,7 @@ class NLUModel():
         '''
         pass
 
-    def evaluate(y_true, y_pred):
+    def evaluate(self, y_true, y_pred):
         '''
         Returns: a float corresponding to the accuracy of the model.
         '''
