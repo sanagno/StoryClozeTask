@@ -1,0 +1,42 @@
+Sender: LSF System <lsfadmin@lo-s4-031>
+Subject: Job 2145324: <python wrong_endings.py> in cluster <leonhard> Exited
+
+Job <python wrong_endings.py> was submitted from host <lo-login-02> by user <saioanni> in cluster <leonhard> at Thu May 30 18:02:01 2019
+Job was executed on host(s) <lo-s4-031>, in queue <gpu.24h>, as user <saioanni> in cluster <leonhard> at Thu May 30 18:02:19 2019
+</cluster/home/saioanni> was used as the home directory.
+</cluster/home/saioanni/project2> was used as the working directory.
+Started at Thu May 30 18:02:19 2019
+Terminated at Thu May 30 18:02:35 2019
+Results reported at Thu May 30 18:02:35 2019
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python wrong_endings.py
+------------------------------------------------------------
+
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   10.69 sec.
+    Max Memory :                                 9682 MB
+    Average Memory :                             117.00 MB
+    Total Requested Memory :                     64192.00 MB
+    Delta Memory :                               54510.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   42 sec.
+    Turnaround time :                            34 sec.
+
+The output (if any) follows:
+
+Using TensorFlow backend.
+/cluster/apps/python/3.6.4/lib64/python3.6/site-packages/scipy/spatial/distance.py:649: RuntimeWarning: invalid value encountered in float_scalars
+  dist = 1.0 - uv / np.sqrt(uu * vv)
+Traceback (most recent call last):
+  File "wrong_endings.py", line 90, in <module>
+    end_wrong_i[i] = argmin
+NameError: name 'argmin' is not defined

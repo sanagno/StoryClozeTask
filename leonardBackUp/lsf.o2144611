@@ -1,0 +1,45 @@
+Sender: LSF System <lsfadmin@lo-s4-033>
+Subject: Job 2144611: <python wrong_endings.py> in cluster <leonhard> Exited
+
+Job <python wrong_endings.py> was submitted from host <lo-login-02> by user <saioanni> in cluster <leonhard> at Thu May 30 11:56:39 2019
+Job was executed on host(s) <lo-s4-033>, in queue <gpu.4h>, as user <saioanni> in cluster <leonhard> at Thu May 30 11:56:51 2019
+</cluster/home/saioanni> was used as the home directory.
+</cluster/home/saioanni/project2> was used as the working directory.
+Started at Thu May 30 11:56:51 2019
+Terminated at Thu May 30 12:21:52 2019
+Results reported at Thu May 30 12:21:52 2019
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python wrong_endings.py
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   1497.49 sec.
+    Max Memory :                                 10380 MB
+    Average Memory :                             10178.73 MB
+    Total Requested Memory :                     64192.00 MB
+    Delta Memory :                               53812.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   1527 sec.
+    Turnaround time :                            1513 sec.
+
+The output (if any) follows:
+
+Using TensorFlow backend.
+/cluster/apps/python/3.6.4/lib64/python3.6/site-packages/scipy/spatial/distance.py:649: RuntimeWarning: invalid value encountered in float_scalars
+  dist = 1.0 - uv / np.sqrt(uu * vv)
+Traceback (most recent call last):
+  File "wrong_endings.py", line 76, in <module>
+    random.shuffle(indexes) 
+  File "/cluster/apps/python/3.6.4/lib64/python3.6/random.py", line 275, in shuffle
+    x[i], x[j] = x[j], x[i]
+KeyboardInterrupt
