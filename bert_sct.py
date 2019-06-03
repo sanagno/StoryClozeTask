@@ -1,3 +1,6 @@
+# this has been inspired and based on existing tutorial on bert 
+# https://colab.research.google.com/github/tensorflow/tpu/blob/master/tools/colab/bert_finetuning_with_cloud_tpus.ipynb
+
 import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
