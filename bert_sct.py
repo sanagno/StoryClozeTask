@@ -306,7 +306,7 @@ def single_weight(inputs, segment_ids, weight_size):
     return output_layer_last_sentence
 
 
-def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, num_layers_bw, only_last_sentence,
+def bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_fw, num_layers_bw, only_last_sentence,
                   cell_type):
     """
     Adds a bidirectional layer on top of the previous output
@@ -316,7 +316,7 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, n
     inputs:         		intermediate input with shape [BATCH_SIZE, SEQUENCE_LENGTH, intemrediate_output_size]
     segment_ids:            specified by bert
     input_mask:             specified by bert
-    hidden_size:			hidden size for the rnn used
+    hidden_size_rnn:		hidden size for the rnn used
     num_layers_fw:			number of layers for the foward cell type chosen
     num_layers_bw: 			number of layers for the backward cell type chosen
     only_last_sentence: 	whether to take into accoun only the last sentence
@@ -327,16 +327,17 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, n
                                    "intermediate_output_size] "
 
     if only_last_sentence:
+        hidden_size = inputs.shape[-1].value
         # keep only the outputs that correspond to the last sentence
         inputs = inputs * tf.tile(
             tf.expand_dims(tf.cast(segment_ids, tf.float32), 2), [1, 1, hidden_size])
 
     if cell_type == 'gru':
-        cells_fw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_fw)]
-        cells_bw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_bw)]
+        cells_fw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size_rnn) for _ in range(num_layers_fw)]
+        cells_bw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size_rnn) for _ in range(num_layers_bw)]
     elif cell_type == 'lstm':
-        cells_fw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size) for _ in range(num_layers_fw)]
-        cells_bw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size) for _ in range(num_layers_bw)]
+        cells_fw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size_rnn) for _ in range(num_layers_fw)]
+        cells_bw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size_rnn) for _ in range(num_layers_bw)]
     else:
         print('RNN cell type', cell_type, 'not supported')
         sys.exit(1)
@@ -355,7 +356,7 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, n
                                                                                    inputs,
                                                                                    dtype=tf.float32)
 
-    # stack outpts and transpose them back into shape [BATCH_SIZE, SEQUENCE_LENGTH, hidden_size * 2]
+    # stack outpts and transpose them back into shape [BATCH_SIZE, SEQUENCE_LENGTH, hidden_size_rnn * 2]
     outputs = tf.stack(outputs)
     outputs = tf.transpose(outputs, [1, 0, 2])
 
@@ -437,6 +438,8 @@ def highway_network(inputs, num_highway_layers):
 
     return inputs
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
 
 def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
                  num_labels):
@@ -482,7 +485,7 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
                     hidden_size_rnn = int(network_layer_parameters[1])
                     num_layers_fw = int(network_layer_parameters[2])
                     num_layers_bw = int(network_layer_parameters[3])
-                    only_last_sentence = bool(network_layer_parameters[4])
+                    only_last_sentence = str2bool(network_layer_parameters[4])
                     cell_type = network_layer_parameters[5]
 
                     if flags.verbose:
@@ -678,7 +681,6 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
     # Return the actual model function in the closure
     return model_fn
-
 
 def main(argv):
     print("\nCommand-line Arguments:")
@@ -887,8 +889,8 @@ if __name__ == '__main__':
                                 singleweight-weight_size \n \
                                 bidirectional-hidden_size-num_layers_fw-num_layers_bw-{only_last_sentence:True|False}-{lstm|gru} \n \
                                 conv-[kernel_sizes]-[filters]-[pool_sizes] \n \
-                                'highway'-[num_layers] \n \
-                                'dense'-layers-keep_prob (default bidirectional-768-1-1-True-lstm:dense-[512]-0.9)")
+                                highway-num_layers \n \
+                                dense-layers-keep_prob (default bidirectional-768-1-1-True-lstm:dense-[512]-0.9)")
 
     flags = tf.app.flags.FLAGS
 
