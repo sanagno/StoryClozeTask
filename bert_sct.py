@@ -70,7 +70,7 @@ def create_tokenizer_from_hub_module():
 		tokenization_info = bert_module(signature="tokenization_info", as_dict=True)
 		with tf.Session() as sess:
 			vocab_file, do_lower_case = sess.run([tokenization_info["vocab_file"],
-												  tokenization_info["do_lower_case"]])
+													tokenization_info["do_lower_case"]])
 
 	return bert.tokenization.FullTokenizer(
 		vocab_file=vocab_file, do_lower_case=do_lower_case)
@@ -115,7 +115,7 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
-						   tokenizer, percentage_synonyms):
+							 tokenizer, percentage_synonyms):
 	"""
 	Converts a single `InputExample` into a single `InputFeatures`.
 
@@ -273,7 +273,7 @@ def dense_layer(inputs, layers, keep_prob=0.9, activation=tf.nn.relu):
 
 	for i, layer_size in enumerate(layers):
 		dense_layer_i = tf.keras.layers.Dense(layer_size, name='DenseLayer_' + str(i), use_bias=True,
-											  activation=activation)
+												activation=activation)
 		inputs = dense_layer_i(inputs)
 		inputs = tf.nn.dropout(inputs, keep_prob=keep_prob)
 
@@ -308,7 +308,7 @@ def single_weight(inputs, segment_ids, weight_size):
 
 
 def bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_fw, num_layers_bw, only_last_sentence,
-				  cell_type):
+					cell_type):
 	"""
 	Adds a bidirectional layer on top of the previous output
 
@@ -325,7 +325,7 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_f
 	"""
 	assert cell_type in ['gru', 'lstm'], "RNN type not supported"
 	assert len(inputs.shape) == 3, "shape for input in single_weight should be [BATCH_SIZE, SEQUENCE_LENGTH, " \
-								   "intermediate_output_size] "
+									 "intermediate_output_size] "
 
 	if only_last_sentence:
 		hidden_size = inputs.shape[-1].value
@@ -353,9 +353,9 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_f
 
 	with tf.variable_scope("last_sentence"):
 		outputs, output_state_fw, output_state_bw = tf.nn.static_bidirectional_rnn(cell_fw,
-																				   cell_bw,
-																				   inputs,
-																				   dtype=tf.float32)
+																					 cell_bw,
+																					 inputs,
+																					 dtype=tf.float32)
 
 	# stack outpts and transpose them back into shape [BATCH_SIZE, SEQUENCE_LENGTH, hidden_size_rnn * 2]
 	outputs = tf.stack(outputs)
@@ -395,7 +395,7 @@ def conv(inputs, kernel_sizes, filters, pool_sizes, max_seq_length, hidden_size)
 	hidden_size:            original hidden size
 	"""
 	assert len(inputs.shape) == 3, "shape for input in single_weight should be [BATCH_SIZE, SEQUENCE_LENGTH, " \
-								   "intemrediate_output_size] "
+									 "intemrediate_output_size] "
 	assert len(kernel_sizes) == len(filters) and len(filters) == len(
 		pool_sizes), "incompatible number of layers for kernel_sizes, filters and pool_sizes"
 
@@ -491,10 +491,10 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
 
 					if flags.verbose:
 						print('Creating layer bidirectional:', hidden_size_rnn, num_layers_fw, num_layers_bw,
-							  only_last_sentence, cell_type)
+								only_last_sentence, cell_type)
 
 					inputs = bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_fw,
-										   num_layers_bw, only_last_sentence, cell_type)
+											 num_layers_bw, only_last_sentence, cell_type)
 
 				elif network_type == 'conv':
 					# network_type='conv'-[kernel_sizes]-[filters]-[pool_sizes]
@@ -518,7 +518,7 @@ def create_model(is_predicting, input_ids, input_mask, segment_ids, labels,
 						print('Creating layer conv:', kernel_sizes, filters, pool_sizes)
 
 					inputs = conv(inputs, kernel_sizes, filters, pool_sizes,
-								  flags.max_seq_length, inputs.shape[-1].value)
+									flags.max_seq_length, inputs.shape[-1].value)
 
 				elif network_type == 'highway':
 					# network_type='highway'-[num_layers]
@@ -585,11 +585,11 @@ def get_final_predictions(in_contexts, in_last_sentences, tokenizer, estimator: 
 	label_list:             possible values
 	"""
 	input_examples = [run_classifier.InputExample(guid="", text_a=x, text_b=y, label=0) for x, y in
-					  zip(in_contexts, in_last_sentences)]  # here, "" is just a dummy label
+						zip(in_contexts, in_last_sentences)]  # here, "" is just a dummy label
 	input_features = run_classifier.convert_examples_to_features(input_examples, label_list, flags.max_seq_length,
 																 tokenizer)
 	predict_input_fn = run_classifier.input_fn_builder(features=input_features, seq_length=flags.max_seq_length,
-													   is_training=False, drop_remainder=False)
+														 is_training=False, drop_remainder=False)
 	predictions = estimator.predict(predict_input_fn)
 	predictions = [prediction['probabilities'] for prediction in predictions]
 
@@ -664,12 +664,12 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
 			if mode == tf.estimator.ModeKeys.TRAIN:
 				return tf.estimator.EstimatorSpec(mode=mode,
-												  loss=loss,
-												  train_op=train_op)
+													loss=loss,
+													train_op=train_op)
 			else:
 				return tf.estimator.EstimatorSpec(mode=mode,
-												  loss=loss,
-												  eval_metric_ops=eval_metrics)
+													loss=loss,
+													eval_metric_ops=eval_metrics)
 		else:
 			(predicted_labels, log_probs) = create_model(
 				is_predicting, input_ids, input_mask, segment_ids, label_ids, num_labels)
@@ -700,7 +700,7 @@ def main(argv):
 		raise SystemError('GPU device not found')
 
 	data_val = pd.read_csv(os.path.join(flags.data_dir, 'cloze_test_val__spring2016 - cloze_test_ALL_val.csv'),
-						   header='infer')
+							 header='infer')
 	data_test = pd.read_csv(os.path.join(flags.data_dir, 'cloze_test_test__spring2016 - cloze_test_ALL_test.csv'),
 							header='infer')
 
@@ -729,15 +729,15 @@ def main(argv):
 
 	train_InputExamples = pd.concat([train] * flags.num_epochs).apply(
 		lambda x:bert.run_classifier.InputExample(guid=None,
-												  text_a=x[CONTEXT_COLUMN],
-												  text_b=x[ENDING_COLUMN],
-												  label=x[LABEL_COLUMN]),
+													text_a=x[CONTEXT_COLUMN],
+													text_b=x[ENDING_COLUMN],
+													label=x[LABEL_COLUMN]),
 		axis=1)
 
 	test_InputExamples = test.apply(lambda x: bert.run_classifier.InputExample(guid=None,
-																			   text_a=x[CONTEXT_COLUMN],
-																			   text_b=x[ENDING_COLUMN],
-																			   label=x[LABEL_COLUMN]), axis=1)
+																				 text_a=x[CONTEXT_COLUMN],
+																				 text_b=x[ENDING_COLUMN],
+																				 label=x[LABEL_COLUMN]), axis=1)
 
 	# get tokenizer from bert
 	tokenizer = create_tokenizer_from_hub_module()
@@ -745,7 +745,7 @@ def main(argv):
 	# Convert our train and test features to InputFeatures that BERT understands.
 	# replace in each tarining sample a number of words
 	train_features = convert_examples_to_features(train_InputExamples, label_list, flags.max_seq_length, tokenizer,
-												  set_synonyms=True, percentage_synonyms=flags.percentage_synonyms)
+													set_synonyms=True, percentage_synonyms=flags.percentage_synonyms)
 
 	test_features = convert_examples_to_features(test_InputExamples, label_list, flags.max_seq_length, tokenizer)
 
@@ -854,16 +854,16 @@ if __name__ == '__main__':
 	del_all_flags(tf.flags.FLAGS)
 
 	tf.app.flags.DEFINE_string("data_dir", "/gdrive/My Drive/Colab Notebooks/NLU/data/project2/",
-							   "Where the training data is stored")
+								 "Where the training data is stored")
 	tf.app.flags.DEFINE_string("output_dir", "./output_dir", "Where the output data will be stored")
 	tf.app.flags.DEFINE_string("tfhub_cache_dir", "./tfhub_cache_dir", "Cached directory for tf hub")
 	tf.app.flags.DEFINE_integer("num_epochs", 5, "Number of epochs to run for")
 	tf.app.flags.DEFINE_string("bert_model_hub", "https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1",
-							   "BERT model to choose")
+								 "BERT model to choose")
 	tf.app.flags.DEFINE_integer("batch_size", 16, "batch size")
 	tf.app.flags.DEFINE_float("learning_rate", 2e-5, "learning rate")
 	tf.app.flags.DEFINE_float("flags.percentage_synonyms", 0.2,
-							  "percentage of words to replace with synonyms in each story")
+								"percentage of words to replace with synonyms in each story")
 
 	# Warmup is a period of time where the learning rate
 	# is small and gradually increases (usually helps training))
@@ -879,8 +879,8 @@ if __name__ == '__main__':
 	tf.app.flags.DEFINE_string('f', '', 'kernel')  # Dummy entry because colab is weird.
 
 	tf.app.flags.DEFINE_string('network',
-							   "bidirectional-768-1-1-True-lstm:dense-[512]-0.9",
-							   "network architecture: passed-form: network_type:network_type:...:network_type \n \
+								 "bidirectional-768-1-1-True-lstm:dense-[512]-0.9",
+								 "network architecture: passed-form: network_type:network_type:...:network_type \n \
 								where each network type has the form network_name-parameter_1-parameter_2-...-parameter_N \n \
 								Supported options are: \n \
 								singleweight-weight_size \n \
