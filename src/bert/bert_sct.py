@@ -710,11 +710,8 @@ def main(argv):
     nltk.download('wordnet')
 
     # create datasets based on the stories provided
-    val_pd = create_dataset(data_val)
-    test_pd = create_dataset(data_test)
-
-    train = shuffle(val_pd)
-    test = test_pd
+    train = shuffle(create_dataset(data_val))
+    test = create_dataset(data_test)
 
     print('Size of the training set:', len(train))
     print('Size of the test set:', len(test))
@@ -734,11 +731,7 @@ def main(argv):
                                                   label=x[LABEL_COLUMN]),
         axis=1)
 
-    test_InputExamples = test.apply(lambda x: bert.run_classifier.InputExample(guid=None,
-                                                                               text_a=x[CONTEXT_COLUMN],
-                                                                               text_b=x[ENDING_COLUMN],
-                                                                               label=x[LABEL_COLUMN]), axis=1)
-
+  
     # get tokenizer from bert
     tokenizer = create_tokenizer_from_hub_module()
 
@@ -746,8 +739,6 @@ def main(argv):
     # replace in each tarining sample a number of words
     train_features = convert_examples_to_features(train_InputExamples, label_list, flags.max_seq_length, tokenizer,
                                                   set_synonyms=True, percentage_synonyms=flags.percentage_synonyms)
-
-    test_features = convert_examples_to_features(test_InputExamples, label_list, flags.max_seq_length, tokenizer)
 
     # Compute # train and warmup steps from batch size
     num_train_steps = int(len(train_features) / flags.batch_size)
@@ -796,13 +787,13 @@ def main(argv):
         predictions = get_final_predictions(test['story'].values, test['ending'].values,
                                             tokenizer, estimator, label_list)
 
-        val_score = accuracy_score(true_labels_val, combine_predictions(predictions))
+        test_score = accuracy_score(true_labels_val, combine_predictions(predictions))
 
         # save results on disk to combine results at a next step
         # noinspection PyTypeChecker
         np.savetxt(
             os.path.join("./" + flags.save_results_dir,
-                         "predictions_test_" + str(val_score) + '_classifier_' + str(i) + '.csv'),
+                         "predictions_test_" + str(test_score) + '_classifier_' + str(i) + '.csv'),
             predictions, delimiter=",")
 
     # ==============================================================================================================
