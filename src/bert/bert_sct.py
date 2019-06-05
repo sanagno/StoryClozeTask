@@ -817,7 +817,7 @@ def main(argv):
 
     # take number of classifiers from the names of the file
     # noinspection PyTypeChecker
-    classifiers = [int(file.split("_")[4].split(".")[0]) for file in files]
+    classifiers = [int(file.split("_")[5].split(".")[0]) for file in files if 'original' in file]
     num_classifiers = np.max(classifiers)
 
     predictions_test = list()
@@ -827,12 +827,12 @@ def main(argv):
         roc_test_file = [x for x in files if 'classifier_' + str(i) in x and 'original' in x][0]
         eth_test_file = [x for x in files if 'classifier_' + str(i) in x and 'eth' in x][0]
 
-        accuracy = float(test_file.split('_')[3])
-
-        predictions_file_test = np.genfromtxt(os.path.join("./" + flags.save_results_dir, roc_test_file), delimiter=',')
+        accuracy = float(roc_test_file.split('_')[3])
+        
+        predictions_file_test = np.genfromtxt(os.path.join(flags.save_results_dir, roc_test_file), delimiter=',')
         predictions_test.append(predictions_file_test)
 
-        predictions_file_eth_test_set = np.genfromtxt(os.path.join("./" + flags.save_results_dir, eth_test_file), delimiter=',')
+        predictions_file_eth_test_set = np.genfromtxt(os.path.join(flags.save_results_dir, eth_test_file), delimiter=',')
         predictions_eth_test_set.append(predictions_file_eth_test_set)
 
         print(f'For classifier {i:2d} roc test accuracy {accuracy:.6f}')
@@ -848,7 +848,7 @@ def main(argv):
             print('ensemble accuracy by taking the mode of each prediction')
             print(accuracy_score(true_labels, preds_mode))
         else:
-            np.savetxt(os.path.join("./" + flags.save_results_dir, "predictions_test_eth_ensemble_mode.csv"),
+            np.savetxt(os.path.join(flags.save_results_dir, "predictions_test_eth_ensemble_mode.csv"),
                             preds_mode, delimiter=",")
 
         preds_prob = np.mean(predictions, axis=0)
@@ -858,11 +858,11 @@ def main(argv):
             print('ensemble accuracy by adding the prediction probabilities')
             print(accuracy_score(true_labels, preds_prob))
         else:
-            np.savetxt(os.path.join("./" + flags.save_results_dir, "predictions_test_eth_ensemble_probabilities.csv"),
+            np.savetxt(os.path.join(flags.save_results_dir, "predictions_test_eth_ensemble_probabilities.csv"),
                             preds_mode, delimiter=",")
 
     print_ensemble_predictions(predictions_test, true_labels=true_labels_test)
-    print_ensemble_predictions(predictions_eth_test_set)
+    print_ensemble_predictions(predictions_eth_test_set, original_test_set=False)
 
 
 if __name__ == '__main__':
