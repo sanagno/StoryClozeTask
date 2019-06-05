@@ -30,7 +30,7 @@ from bert.run_classifier import PaddingInputExample, _truncate_seq_pair, InputFe
 # make sure that you have bert installed
 # pip install bert-tensorflow
 
-def create_dataset(dataset: pd.DataFrame):
+def create_dataset(dataset: pd.DataFrame, contains_answers=True):
     """
     Creates the dataset given a context story and two possible endings. For each ending creates a different story
     with the relative class denoting if this story is correct or not
@@ -55,14 +55,18 @@ def create_dataset(dataset: pd.DataFrame):
         contexts.append(" ".join(story_start))
         last_sentences.append(dataset.iloc[pos]['RandomFifthSentenceQuiz2'])
 
-        if dataset.iloc[pos]['AnswerRightEnding'] == 1:
-            classes.append(0)
-            classes.append(1)
-        else:
-            classes.append(1)
-            classes.append(0)
+        if contains_answers:
+            if dataset.iloc[pos]['AnswerRightEnding'] == 1:
+                classes.append(0)
+                classes.append(1)
+            else:
+                classes.append(1)
+                classes.append(0)
 
-    return pd.DataFrame({'story': contexts, 'ending': last_sentences, 'class': classes})
+    if contains_answers:
+        return pd.DataFrame({'story': contexts, 'ending': last_sentences, 'class': classes})
+    else:
+        return pd.DataFrame({'story': contexts, 'ending': last_sentences})
 
 
 def create_tokenizer_from_hub_module():
@@ -699,10 +703,9 @@ def main(argv):
     if device_name != '/device:GPU:0':
         raise SystemError('GPU device not found')
 
-    data_val = pd.read_csv(os.path.join(flags.data_dir, 'cloze_test_val__spring2016 - cloze_test_ALL_val.csv'),
-                           header='infer')
-    data_test = pd.read_csv(os.path.join(flags.data_dir, 'cloze_test_test__spring2016 - cloze_test_ALL_test.csv'),
-                            header='infer')
+    data_val = pd.read_csv(os.path.join(flags.data_dir, flags.val_file_name), header='infer')
+    data_test = pd.read_csv(os.path.join(flags.data_dir, flags.test_file_name), header='infer')
+    data_test_eth = pd.read_csv(os.path.join(flags.data_dir, flags.provided_test_file_name), header='infer')
 
     # download required nltk packages
     nltk.download('punkt')
@@ -712,9 +715,11 @@ def main(argv):
     # create datasets based on the stories provided
     train = shuffle(create_dataset(data_val))
     test = create_dataset(data_test)
+    test_eth = create_dataset(data_test_eth, contains_answers=False)
 
-    print('Size of the training set:', len(train))
-    print('Size of the test set:', len(test))
+    print('Size of the training set:\t', len(train))
+    print('Size of the test set:\t\t', len(test))
+    print('Size of the test set eth:\t', len(test_eth))
 
     # transforms the dataset into a form that bert can understand
     CONTEXT_COLUMN = 'story'
@@ -768,7 +773,7 @@ def main(argv):
     os.system('rm -rf ' + flags.save_results_dir + ' || true')
     os.system('mkdir ' + flags.save_results_dir)
 
-    true_labels_val = test['class'].values[::2] + 1
+    true_labels_test = test['class'].values[::2] + 1
 
     for i in range(flags.num_estimators):
         os.system('rm -rf ' + flags.output_dir + ' || true')
@@ -787,14 +792,22 @@ def main(argv):
         predictions = get_final_predictions(test['story'].values, test['ending'].values,
                                             tokenizer, estimator, label_list)
 
-        test_score = accuracy_score(true_labels_val, combine_predictions(predictions))
+        test_score = accuracy_score(true_labels_test, combine_predictions(predictions))
 
         # save results on disk to combine results at a next step
         # noinspection PyTypeChecker
         np.savetxt(
             os.path.join("./" + flags.save_results_dir,
-                         "predictions_test_" + str(test_score) + '_classifier_' + str(i) + '.csv'),
+                         "predictions_original_test_" + str(test_score) + '_classifier_' + str(i) + '.csv'),
             predictions, delimiter=",")
+
+        predictions_eth = get_final_predictions(test_eth['story'].values, test_eth['ending'].values,
+                                                tokenizer, estimator, label_list)
+
+        np.savetxt(
+            os.path.join("./" + flags.save_results_dir,
+                         "predictions_test_eth_classifier_" + str(i) + '.csv'),
+            predictions_eth, delimiter=",")
 
     # ==============================================================================================================
     # finally combine results for the ensemble score
@@ -802,38 +815,54 @@ def main(argv):
     # Combine all previous acquired results for an ensemble
     files = [f for f in listdir(flags.save_results_dir) if isfile(join(flags.save_results_dir, f))]
 
-    true_labels_test = test['class'].values[::2] + 1
-
     # take number of classifiers from the names of the file
     # noinspection PyTypeChecker
     classifiers = [int(file.split("_")[4].split(".")[0]) for file in files]
     num_classifiers = np.max(classifiers)
 
-    predictions_test = []
+    predictions_test = list()
+    predictions_eth_test_set = list()
+
     for i in range(num_classifiers + 1):
-        test_file = [x for x in files if 'classifier_' + str(i) in x][0]
+        roc_test_file = [x for x in files if 'classifier_' + str(i) in x and 'original' in x][0]
+        eth_test_file = [x for x in files if 'classifier_' + str(i) in x and 'eth' in x][0]
 
-        accuracy = float(test_file.split('_')[2])
+        accuracy = float(test_file.split('_')[3])
 
-        predictions_file_test = np.genfromtxt(os.path.join("./" + flags.save_results_dir, test_file), delimiter=',')
+        predictions_file_test = np.genfromtxt(os.path.join("./" + flags.save_results_dir, roc_test_file), delimiter=',')
         predictions_test.append(predictions_file_test)
-        print(f'For classifier {i:2d} test accuracy {accuracy:.6f}')
 
-    def print_ensemble_predictions(predictions, true_labels):
+        predictions_file_eth_test_set = np.genfromtxt(os.path.join("./" + flags.save_results_dir, eth_test_file), delimiter=',')
+        predictions_eth_test_set.append(predictions_file_eth_test_set)
+
+        print(f'For classifier {i:2d} roc test accuracy {accuracy:.6f}')
+
+    def print_ensemble_predictions(predictions, true_labels=None, original_test_set=True):
+        assert (original_test_set==False or true_labels is not None), "If predictions on roc stories specify labels."
+
         preds_mode = [combine_predictions(p) for p in predictions]
         preds_mode = np.array(preds_mode)
         preds_mode = stats.mode(preds_mode)[0][0]
 
-        print('ensemble accuracy by taking the mode of each prediction')
-        print(accuracy_score(true_labels, preds_mode))
+        if original_test_set:
+            print('ensemble accuracy by taking the mode of each prediction')
+            print(accuracy_score(true_labels, preds_mode))
+        else:
+            np.savetxt(os.path.join("./" + flags.save_results_dir, "predictions_test_eth_ensemble_mode.csv"),
+                            preds_mode, delimiter=",")
 
         preds_prob = np.mean(predictions, axis=0)
         preds_prob = combine_predictions(preds_prob)
 
-        print('ensemble accuracy by adding the prediction probabilities')
-        print(accuracy_score(true_labels, preds_prob))
+        if original_test_set:
+            print('ensemble accuracy by adding the prediction probabilities')
+            print(accuracy_score(true_labels, preds_prob))
+        else:
+            np.savetxt(os.path.join("./" + flags.save_results_dir, "predictions_test_eth_ensemble_probabilities.csv"),
+                            preds_mode, delimiter=",")
 
-    print_ensemble_predictions(predictions_test, true_labels_test)
+    print_ensemble_predictions(predictions_test, true_labels=true_labels_test)
+    print_ensemble_predictions(predictions_eth_test_set)
 
 
 if __name__ == '__main__':
@@ -845,28 +874,34 @@ if __name__ == '__main__':
         for keys in keys_list:
             FLAGS.__delattr__(keys)
 
-
     del_all_flags(tf.flags.FLAGS)
 
-    tf.app.flags.DEFINE_string("data_dir", "/gdrive/My Drive/Colab Notebooks/NLU/data/project2/",
-                               "Where the training data is stored")
+    tf.app.flags.DEFINE_string("data_dir", "/cluster/home/sanagnos/NLU/project2/data/",
+                               "where the training data is stored")
+    tf.app.flags.DEFINE_string("val_file_name", "cloze_test_val__spring2016 - cloze_test_ALL_val.csv",
+                               "name of the validation file")
+    tf.app.flags.DEFINE_string("test_file_name", "test_for_report-stories-labels.csv",
+                               "name of the original test cloze file")
+    tf.app.flags.DEFINE_string("provided_test_file_name", "test-stories.csv",
+                               "name of the provided test file")
+
     tf.app.flags.DEFINE_string("output_dir", "./output_dir", "Where the output data will be stored")
     tf.app.flags.DEFINE_string("tfhub_cache_dir", "./tfhub_cache_dir", "Cached directory for tf hub")
     tf.app.flags.DEFINE_integer("num_epochs", 5, "Number of epochs to run for")
-    tf.app.flags.DEFINE_string("bert_model_hub", "https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1",
+    tf.app.flags.DEFINE_string("bert_model_hub", "https://tfhub.dev/google/bert_uncased_L-24_H-1024_A-16/1",
                                "BERT model to choose")
     tf.app.flags.DEFINE_integer("batch_size", 16, "batch size")
     tf.app.flags.DEFINE_float("learning_rate", 2e-5, "learning rate")
-    tf.app.flags.DEFINE_float("flags.percentage_synonyms", 0.2,
+    tf.app.flags.DEFINE_float("percentage_synonyms", 0.2,
                               "percentage of words to replace with synonyms in each story")
 
     # Warmup is a period of time where the learning rate
     # is small and gradually increases (usually helps training))
     tf.app.flags.DEFINE_float("warmup_proportion", 0.1, "warmup proportion")
 
-    tf.app.flags.DEFINE_integer("save_checkpoints_steps", 500, "save model every these many steps")
+    tf.app.flags.DEFINE_integer("save_checkpoints_steps", 5000, "save model every these many steps")
     tf.app.flags.DEFINE_integer("save_summary_steps", 50, "save summary every these many steps")
-    tf.app.flags.DEFINE_string("save_results_dir", "results_predictions", "directory to store intermediate results")
+    tf.app.flags.DEFINE_string("save_results_dir", "./results_predictions", "directory to store intermediate results")
 
     tf.app.flags.DEFINE_integer("num_estimators", 15, "number of estimators to use for the ensemble")
     tf.app.flags.DEFINE_integer("max_seq_length", 96, "Maximum length of a sequence of words in a story.")
@@ -887,4 +922,3 @@ if __name__ == '__main__':
     flags = tf.app.flags.FLAGS
 
     tf.app.run()
-
