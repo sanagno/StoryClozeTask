@@ -19,6 +19,7 @@ from os.path import isfile, join
 
 import nltk
 from nltk.corpus import wordnet
+from nltk.corpus import stopwords
 
 import bert
 from bert import run_classifier
@@ -27,8 +28,7 @@ from bert import tokenization
 from bert.run_classifier import PaddingInputExample, _truncate_seq_pair, InputFeatures
 
 
-# make sure that you have bert installed
-# pip install bert-tensorflow
+stop_words = set(stopwords.words('english'))
 
 def create_dataset(dataset: pd.DataFrame, contains_answers=True):
     """
@@ -86,6 +86,9 @@ def replace_with_synonym(token, tokenizer):
     """
     Given a token, returns a random synonym of this token, given a vocabulary set (wordnet)
     """
+    if token in stop_words:
+        return token
+
     new_token = token
     synonyms = []
     for syn in wordnet.synsets(token):
@@ -710,6 +713,7 @@ def main(argv):
     # download required nltk packages
     nltk.download('punkt')
     nltk.download('averaged_perceptron_tagger')
+    nltk.download('stopwords')
     nltk.download('wordnet')
 
     # create datasets based on the stories provided
@@ -905,7 +909,7 @@ if __name__ == '__main__':
 
     tf.app.flags.DEFINE_integer("num_estimators", 15, "number of estimators to use for the ensemble")
     tf.app.flags.DEFINE_integer("max_seq_length", 96, "Maximum length of a sequence of words in a story.")
-    tf.app.flags.DEFINE_boolean("verbose", True, "vebose")
+    tf.app.flags.DEFINE_boolean("verbose", False, "vebose")
     tf.app.flags.DEFINE_string('f', '', 'kernel')  # Dummy entry because colab is weird.
 
     tf.app.flags.DEFINE_string('network',
