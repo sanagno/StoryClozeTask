@@ -175,8 +175,8 @@ class FCSkip(tf.keras.Model):
         sample_hidden = self.encoder.initialize_hidden_state(tf.shape(input_embeddings)[0])
         sample_output, sample_hidden = self.encoder(input_embeddings[:, :4, :], sample_hidden)
 
-        # concatenated_input = tf.concat([sample_output[:, -1, :], input_embeddings[:, 4, :]], axis=1)
-        concatenated_input = sample_output[:, -1, :] + input_embeddings[:, 4, :]
+        concatenated_input = tf.concat([sample_output[:, -1, :], input_embeddings[:, 4, :]], axis=1)
+        # concatenated_input = sample_output[:, -1, :] + input_embeddings[:, 4, :]
 
         return self.feed_forward(concatenated_input, input_labels)
 
