@@ -20,9 +20,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import accuracy_score
 from model import NLUModel
 
-ENCODINGS_TRAIN = '../encodings_all.npy'
-ENCODINGS_VAL = '../encodings_val.npy'
-LABELS = '../labels.npy'
+ENCODINGS_TRAIN = '../../encodings_all.npy'
+ENCODINGS_VAL = '../../encodings_val.npy'
+LABELS = '../../labels.npy'
 
 class ContextLSTM(NLUModel):
 
@@ -52,7 +52,7 @@ class ContextLSTM(NLUModel):
     def fit(self, X, y, epochs=10, batch_size=16):
 
         self.model.fit(X, y, epochs=epochs,
-                  batch_size=batch_size)
+                  batch_size=batch_size, validation_split=0.3)
 
     def predict(self, X):
         val_beg = X[0]
@@ -68,7 +68,7 @@ class ContextLSTM(NLUModel):
             else:
                 pred = 0
 
-            final_predictions[i] = pred
+            final_predictions[i] = pred + 1
 
         return final_predictions
 

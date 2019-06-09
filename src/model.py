@@ -39,7 +39,7 @@ class NLUModel():
         """
         Returns: a np.array of shape(validation_set.shape[0],) with the
         predictions of the model.
-        NOTICE: The predictions must be 0 or 1!
+        NOTICE: The predictions must be 1 or 2!
         """
         pass
 

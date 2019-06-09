@@ -21,7 +21,7 @@ import numpy as np
 
 VAL_SET = 'test_for_report-stories_labels.csv' # Which is actually test set
 ROC_VAL_SET = 'train_stories.csv'
-DATA_DIR = '../dataset'
+DATA_DIR = '../data'
 
 from model import NLUModel
 analyzer = SentimentIntensityAnalyzer()
@@ -94,7 +94,7 @@ class SentimentLSTM(NLUModel):
                 y = 2
             else:
                 y = 1
-            final_predictions[i] = y - 1
+            final_predictions[i] = y
 
         return final_predictions
 
