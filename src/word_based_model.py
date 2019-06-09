@@ -12,7 +12,7 @@ from model import NLUModel
 from utils import load_embedding
 from data  import encode_text, shuffle_endings
 
-LOG_PATH = "./log/lsdSem_lm/"
+LOG_PATH = "./log/word_based/"
 EMB_PATH = "./data/glove/glove.6B.100d.txt"
 
 class WordBasedClassifier(NLUModel):
@@ -397,7 +397,7 @@ class WordBasedClassifier(NLUModel):
         config.gpu_options.visible_device_list = "0"
 
         # Define Optimizer
-        self.optimizer(optimizer, learning_rate)
+        self._optimizer(optimizer, learning_rate)
 
         # Model saver
         saver = tf.train.Saver(tf.global_variables())

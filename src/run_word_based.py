@@ -15,18 +15,10 @@ if __name__ == '__main__':
 
     train_pos_stories = dataloader['train']
     valid_stories, valid_labels = dataloader['valid']
+    test_stories,  test_labels  = dataloader['test']
 
-    # Load negative samples by language model 
-    f_neg_endings = open('neg_endings_v2_argmax', 'r')
-    neg_endings_tmp = f_neg_endings.readlines()
-
-    neg_endings = []
-
-    for line in neg_endings_tmp: 
-        sentence = line.strip() # remove \n' character 
-        neg_endings.append(sentence)
-
-    neg_endings = np.array(neg_endings)
+    # Load negative endings 
+    neg_endings = np.load('incorrect_endings_v2_argmax.npy')
     neg_endings = neg_endings[:, np.newaxis]
 
     # Append to positive stories 
@@ -46,11 +38,14 @@ if __name__ == '__main__':
 
     # Get encoded validation data 
     encoded_valid_stories = model.get_test_data(valid_stories)
+    encoded_test_stories  = model.get_test_data(test_stories)
 
     # Train the model 
-    model.train(encoded_train_stories, train_labels, encoded_valid_stories, valid_labels, epochs=8, learning_rate=5e-3)
+    model.fit(encoded_train_stories, train_labels, encoded_valid_stories, valid_labels, epochs=3, learning_rate=5e-3)
 
     print('Validation Accuracy: ', model.score(encoded_valid_stories, valid_labels))
+
+    print('Test Accuracy: ', model.score(encoded_test_stories, test_labels))
 
 
     

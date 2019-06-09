@@ -12,6 +12,10 @@ import tensorflow_hub as hub
 from tqdm import tqdm 
 from bert import tokenization
 
+TRAIN_FILE = 'train_stories.csv'
+VALID_FILE = 'cloze_test_val__spring2016 - cloze_test_ALL_val.csv'
+TEST_FILE  = 'test_for_report-stories_labels.csv'
+
 # use the BERT tokenizer
 BERT_MODEL_HUB = "https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1"
 
@@ -30,7 +34,7 @@ def create_tokenizer_from_hub_module():
 
     return bert.tokenization.FullTokenizer(vocab_file=vocab_file, do_lower_case=do_lower_case)
 
-def fetch_data(train_file='train_stories.csv', valid_file='cloze_test_val__spring2016 - cloze_test_ALL_val.csv'):
+def fetch_data():
     """
     Load raw data.
 
@@ -58,23 +62,33 @@ def fetch_data(train_file='train_stories.csv', valid_file='cloze_test_val__sprin
         Validation labels indicating which ending is correct (1 or 2). 
     """
     # Load raw data 
-    train_stories = pd.read_csv('data/%s' %train_file, index_col=False)
+    train_stories = pd.read_csv('data/%s' %TRAIN_FILE, index_col=False)
 
-    valid_data = pd.read_csv('data/%s' %valid_file, index_col=False)
-
-    valid_stories = valid_data.drop('AnswerRightEnding', axis=1, inplace=False)
-    valid_labels = valid_data['AnswerRightEnding'].values # to numpy array 
-
-    # Training data
+    valid_data = pd.read_csv('data/%s' %VALID_FILE, index_col=False)
+    test_data  = pd.read_csv('data/%s' %TEST_FILE,  index_col=False)
+    
+    # Training stories
     train_stories = train_stories.drop('storyid', axis=1)
     train_stories = train_stories.drop('storytitle', axis=1)
     train_stories = train_stories.values # to numpy array 
 
-    # Validation data 
+    # Validation stories 
+    valid_stories = valid_data.drop('AnswerRightEnding', axis=1, inplace=False)
     valid_stories = valid_stories.drop('InputStoryid', axis=1)
     valid_stories = valid_stories.values # to numpy array 
 
-    return {'train': train_stories, 'valid': (valid_stories, valid_labels)}
+    # Validation data
+    valid_labels  = valid_data['AnswerRightEnding'].values # to numpy array 
+
+    # Test stories 
+    test_stories = test_data.drop('AnswerRightEnding', axis=1, inplace=False)
+    test_stories = test_stories.drop('InputStoryid', axis=1)
+    test_stories = test_stories.values # to numpy array 
+
+    # Validation data
+    test_labels  = test_data['AnswerRightEnding'].values # to numpy array 
+
+    return {'train': train_stories, 'valid': (valid_stories, valid_labels), 'test': (test_stories, test_labels)}
 
 def shuffle_endings(corpus, labels):
     """
