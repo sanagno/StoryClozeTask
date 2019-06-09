@@ -63,5 +63,7 @@ class NLUModel():
         Returns: a float corresponding to the accuracy of the model.
         """
         score = accuracy_score(y_true, y_pred)
+
         return score
+
 
