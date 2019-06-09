@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # macOS 
 .DS_Store
 ._.DS_Store
@@ -109,3 +110,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+=======
+__pycache__
+.ipy*
+.vscode
+.trash
+>>>>>>> yannis

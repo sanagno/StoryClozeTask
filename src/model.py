@@ -20,7 +20,10 @@
 
 from sklearn.metrics import accuracy_score
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> yannis
 class NLUModel():
 
     def __init__(self, name):
