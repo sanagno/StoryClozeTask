@@ -19,26 +19,29 @@ from nltk import sent_tokenize
 import pandas as pd
 import numpy as np
 
-VAL_SET = 'cloze_test_val__spring2016 - cloze_test_ALL_val.csv'
-ROC_VAL_SET = 'ROCStories__spring2016 - ROCStories_spring2016.csv'
-TEST_SET = 'cloze_test_test__spring2016 - cloze_test_ALL_test.csv'
+VAL_SET = 'test_for_report-stories_labels.csv' # Which is actually test set
+ROC_VAL_SET = 'train_stories.csv'
 DATA_DIR = '../dataset'
-ENCODER_PATH = 'finetune-transformer-lm-master/model/encoder_bpe_40000.json'
-BPE_PATH = 'finetune-transformer-lm-master/model/vocab_40000.bpe'
-n_ctx = 512
-
-seed = 42
 
 from model import NLUModel
 analyzer = SentimentIntensityAnalyzer()
 
-def polarity(sentence):
+def polarity_no_compound(sentence):
     '''
     Convert a sentence to a np.array containing the polarities
     '''
-    values = analyzer.polarity_scores(sentence).values()
+    polarity_dict = analyzer.polarity_scores(sentence)
+    polarity_dict.pop('compound')
+    values = polarity_dict.values()
     return np.array(list(values))
 
+def polarity_full(sentence):
+    '''
+    Convert a sentence to a np.array containing the polarities
+    '''
+    polarity_dict = analyzer.polarity_scores(sentence)
+    values = polarity_dict.values()
+    return np.array(list(values))
 
 class SentimentLSTM(NLUModel):
 
@@ -48,16 +51,16 @@ class SentimentLSTM(NLUModel):
 
     def __build(self):
         self.model = Sequential()
-        self.model.add(LSTM(128))
+        self.model.add(LSTM(3, input_shape=(4,3)))
         self.model.add(Dropout(0.1))
-        polarity_layer = self.model.add(Dense(4, activation='softmax'))
+        polarity_layer = self.model.add(Dense(3, activation='softmax'))
 
         # Optimize the model so the polarity of the layer is as close as the correct polarity
         def cosine_similarity_loss(layer):
             # Create a loss function that adds the MSE loss to the mean of all squared activations of a specific layer
             def loss(y_true,y_pred):
-                pred_norm = y_pred/K.batch_dot(y_pred,y_pred, axes=[1,1])
-                true_norm = y_true/K.batch_dot(y_true,y_true, axes=[1,1])
+                pred_norm = y_pred/K.square(K.batch_dot(y_pred,y_pred, axes=[1,1]))
+                true_norm = y_true/K.square(K.batch_dot(y_true,y_true, axes=[1,1]))
                 cosine = K.batch_dot(pred_norm, true_norm, axes=[1,1])
                 cosine = K.sum(cosine)
                 return -cosine
@@ -76,11 +79,18 @@ class SentimentLSTM(NLUModel):
         X_test = X[0]
         answer1 = X[1]
         answer2 = X[2]
-        predictions = self.model.predict(X_test, batch_size=1)
+        predictions = self.model.predict(X_test[:,:,[0,1,2]])
+        compound_mean = np.mean(X_test[:,:,3], axis=-1)
+
+        predictions_with_compound = np.zeros((predictions.shape[0], 4))
+        predictions_with_compound[:,[0,1,2]] = predictions
+        predictions_with_compound[:,3] = compound_mean
+
         final_predictions = np.zeros((predictions.shape[0],))
+
         for i in range(predictions.shape[0]):
-            if cosine_similarity(predictions[i].reshape(1,-1), answer1[i].reshape(1,-1)) \
-             < cosine_similarity(predictions[i].reshape(1,-1), answer2[i].reshape(1,-1)):
+            if cosine_similarity(predictions_with_compound[i].reshape(1,-1), answer1[i].reshape(1,-1)) \
+             < cosine_similarity(predictions_with_compound[i].reshape(1,-1), answer2[i].reshape(1,-1)):
                 y = 2
             else:
                 y = 1
@@ -96,9 +106,9 @@ class SentimentLSTM(NLUModel):
         Y = []
         input_sentences = ['InputSentence%d'%i for i in range(1,5)]
         first_sentences = df[input_sentences]
-        beginning_polarities = first_sentences.apply(lambda x: np.stack(x.apply(polarity).values), axis=1)
-        ending_polarity1 = np.stack(df['RandomFifthSentenceQuiz1'].apply(polarity).values, axis=0)
-        ending_polarity2 = np.stack(df['RandomFifthSentenceQuiz2'].apply(polarity).values, axis=0)
+        beginning_polarities = first_sentences.apply(lambda x: np.stack(x.apply(polarity_full).values), axis=1)
+        ending_polarity1 = np.stack(df['RandomFifthSentenceQuiz1'].apply(polarity_full).values, axis=0)
+        ending_polarity2 = np.stack(df['RandomFifthSentenceQuiz2'].apply(polarity_full).values, axis=0)
         correct = df['AnswerRightEnding'].values
         X = np.stack(beginning_polarities.values,axis=0)
         return X, ending_polarity1, ending_polarity2, correct
@@ -106,15 +116,15 @@ class SentimentLSTM(NLUModel):
     def prepare_roc_dataset(self, df):
         input_sentences = ['sentence%d'%i for i in range(1,5)]
         first_sentences = df[input_sentences]
-        beginning_polarities = first_sentences.apply(lambda x: np.stack(x.apply(polarity).values), axis=1)
+        beginning_polarities = first_sentences.apply(lambda x: np.stack(x.apply(polarity_no_compound).values), axis=1)
         ending = df.drop(columns = input_sentences)
-        ending_polarity = ending['sentence5'].apply(polarity)
+        ending_polarity = ending['sentence5'].apply(polarity_no_compound)
         X = np.stack(beginning_polarities.values,axis=0)
         Y = np.stack(ending_polarity.values)
         return X,Y
 
-    def get_train_data(self):
-        roc_df = pd.read_csv(DATA_DIR + '/' + ROC_VAL_SET).drop(columns=['storyid','storytitle'])
+    def get_train_data(self, nrows=None):
+        roc_df = pd.read_csv(DATA_DIR + '/' + ROC_VAL_SET, nrows=nrows).drop(columns=['storyid','storytitle'])
         X, y = self.prepare_roc_dataset(roc_df)
         return X,y
 

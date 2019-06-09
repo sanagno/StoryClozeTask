@@ -12,14 +12,14 @@ def main():
     sent_model = SentimentLSTM()
     trX, trY = sent_model.get_train_data()
     teX, teY = sent_model.get_test_data()
-    sent_model.fit(trX, trY, epochs=1)
+    sent_model.fit(trX, trY, epochs=10)
     predictions[sent_model.name] = sent_model.predict(teX)
 
     # ********* Predict Context LSTM *************
     cont_model = ContextLSTM()
     trX, trY = cont_model.get_train_data()
     teX, teY = cont_model.get_test_data()
-    cont_model.fit(trX, trY, epochs=1)
+    cont_model.fit(trX, trY, epochs=10)
     predictions[cont_model.name] = cont_model.predict(teX)
 
 if __name__ == "__main__":

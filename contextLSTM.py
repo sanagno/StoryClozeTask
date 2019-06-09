@@ -20,7 +20,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import accuracy_score
 from model import NLUModel
 
-ENCODINGS_TRAIN = '../encodings.npy'
+ENCODINGS_TRAIN = '../encodings_all.npy'
 ENCODINGS_VAL = '../encodings_val.npy'
 LABELS = '../labels.npy'
 
@@ -33,25 +33,23 @@ class ContextLSTM(NLUModel):
 
     def __build(self):
         self.model = Sequential()
-        self.model.add(LSTM(self.lstm_units))
+        self.model.add(LSTM(self.lstm_units, input_shape=(4,4800)))
         self.model.add(Dropout(0.1))
-        softmax_layer = self.model.add(Dense(4800, activation='softmax'))
+        softmax_layer = self.model.add(Dense(4800, activation='tanh'))
 
         def cosine_similarity_loss(layer):
             # Create a loss function that adds the MSE loss to the mean of all squared activations of a specific layer
-            def loss(y_true,y_pred):
-                pred_norm = y_pred/KB.batch_dot(y_pred,y_pred, axes=[1,1])
-                true_norm = y_true/KB.batch_dot(y_true,y_true, axes=[1,1])
-                cosine = KB.batch_dot(pred_norm, true_norm, axes=[1,1])
-                cosine = KB.sum(cosine)
-                return -cosine
+            def loss(y_true, y_pred):
+                pred_norm = tf.keras.backend.l2_normalize(y_pred, axis=1)
+                true_norm = tf.keras.backend.l2_normalize(y_true, axis=1)
+                return KB.mean(1 - KB.batch_dot(pred_norm,true_norm, axes=1))
             # Return a function
             return loss
 
         self.model.compile(loss=cosine_similarity_loss(softmax_layer),
                       optimizer='adam')
 
-    def fit(self, X, y, epochs=10, batch_size=32):
+    def fit(self, X, y, epochs=10, batch_size=16):
 
         self.model.fit(X, y, epochs=epochs,
                   batch_size=batch_size)
@@ -74,8 +72,11 @@ class ContextLSTM(NLUModel):
 
         return final_predictions
 
-    def get_train_data(self):
+    def get_train_data(self, nrows=None):
         train = np.load(ENCODINGS_TRAIN)
+
+        if nrows != None:
+            train = train[:nrows]
 
         train_beg = train[:,:4,:]
         train_end = train[:,4,:]
