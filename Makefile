@@ -57,9 +57,9 @@ run_all:
 	run_bert
 
 run_sentiment_analysis:
-	python src/sentimentLSTM.py
+	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" python src/sentimentLSTM.py
 
 run_predict_context:
-	python src/contextLSTM.py
+	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" -R "select[gpu_model0==TeslaV100_SXM2_32GB]" python contextLSTM.py
 
 .PHONY: help setup run_bert run_simple run_all run_glove_and_sent2vec
