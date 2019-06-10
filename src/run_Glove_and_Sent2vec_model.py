@@ -49,7 +49,7 @@ vocab, _, max_len = data.construct_vocab(train_pos_stories)
 
 #encode data
 encoded_valid_stories = np.concatenate(data.encode_text(valid_stories, max_len, vocab),axis=1)
-encoded_test_stories = np.concatanate(data.encode_text(test_stories, max_len, vocab),axis=1)
+encoded_test_stories = np.concatenate(data.encode_text(test_stories, max_len, vocab),axis=1)
 
 #construct the glove_and_sent2vec model
 tf.reset_default_graph()
