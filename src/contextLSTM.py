@@ -102,9 +102,9 @@ class ContextLSTM(NLUModel):
 if __name__ == "__main__":
 
     cont_model = ContextLSTM()
-    trX, trY = cont_model.get_train_data(nrows=100)
+    trX, trY = cont_model.get_train_data()
     teX, teY = cont_model.get_test_data()
-    cont_model.fit(trX, trY, epochs=1)
+    cont_model.fit(trX, trY, epochs=10)
     y_pred = cont_model.predict(teX)
     score = cont_model.evaluate(teY, y_pred)
     print('ContextLSTM score (on test_set):', score)
