@@ -18,7 +18,7 @@ if __name__ == '__main__':
     test_stories,  test_labels  = dataloader['test']
 
     # Load negative endings 
-    neg_endings = np.load('incorrect_endings_v2_argmax.npy')
+    neg_endings = np.load('incorrect_endings/incorrect_endings_v2_argmax.npy')
     neg_endings = neg_endings[:, np.newaxis]
 
     # Append to positive stories 
@@ -34,16 +34,16 @@ if __name__ == '__main__':
     model = WordBasedClassifier(vocab, sentence_len=max_len)
 
     # Get encoded training data 
-    encoded_train_stories, train_labels = model.get_train_data(train_stories, train_labels, shuffle=True)
+    encoded_train_stories, train_labels = model.get_train_data(valid_stories, valid_labels, shuffle=True)
 
     # Get encoded validation data 
     encoded_valid_stories = model.get_test_data(valid_stories)
     encoded_test_stories  = model.get_test_data(test_stories)
 
     # Train the model 
-    model.fit(encoded_train_stories, train_labels, encoded_valid_stories, valid_labels, epochs=3, learning_rate=5e-3)
+    model.fit(encoded_train_stories, train_labels, encoded_test_stories, test_labels, epochs=10, learning_rate=5e-3)
 
-    print('Validation Accuracy: ', model.score(encoded_valid_stories, valid_labels))
+    # print('Validation Accuracy: ', model.score(encoded_valid_stories, valid_labels))
 
     print('Test Accuracy: ', model.score(encoded_test_stories, test_labels))
 

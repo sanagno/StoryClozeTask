@@ -5,6 +5,9 @@
 # training logs 
 log/*
 
+# data 
+data/glove/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

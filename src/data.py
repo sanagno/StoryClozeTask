@@ -140,7 +140,7 @@ def shuffle_endings(corpus, labels):
 
     return shuffled_corpus, shuffled_labels
 
-def construct_vocab(corpus, base_vocab={'<unk>': 0, '<bos>': 1, '<eos>': 2, '<pad>': 3}):
+def construct_vocab(corpus, base_vocab={'<pad>': 0, '<bos>': 1, '<eos>': 2, '<unk>': 3}):
     """
     Associate each word in the vocabulary with a (unique) ID. 
 
@@ -170,7 +170,7 @@ def construct_vocab(corpus, base_vocab={'<unk>': 0, '<bos>': 1, '<eos>': 2, '<pa
 
     tokenizer = create_tokenizer_from_hub_module()
 
-    for story in tqdm(corpus, desc='Constructing Vocabulary'):
+    for story in tqdm(corpus, desc='Constructing Vocabulary', position=0):
         for sentence in story: 
             # Tokenize sentence 
             tokens = [x for x in tokenizer.tokenize(sentence.lower()) if not x.startswith('#')]
@@ -240,7 +240,7 @@ def encode_text(corpus, max_len, vocab):
     story_ID = 0 
     long_context = 0
 
-    for story in tqdm(context_corpus, desc='Encoding Context'):
+    for story in tqdm(context_corpus, desc='Encoding Context', position=0):
         # Reset pointer 
         token_ID = 0
         
@@ -277,7 +277,7 @@ def encode_text(corpus, max_len, vocab):
     story_ID = 0 
     long_ending = 0 
 
-    for story in tqdm(endings_corpus, desc='Encoding Endings'):
+    for story in tqdm(endings_corpus, desc='Encoding Endings', position=0):
         # Reset pointer 
         token_ID = 0
         
@@ -356,7 +356,7 @@ def encode_train_text_for_conditional_generation(corpus, max_len, vocab):
     story_ID = 0 
     long_context = 0
 
-    for story in tqdm(context_corpus, desc='Encoding Context (No Padding)'):
+    for story in tqdm(context_corpus, desc='Encoding Context (No Padding)', position=0):
         # Reset pointer 
         token_ID = 0
         
@@ -396,7 +396,7 @@ def encode_train_text_for_conditional_generation(corpus, max_len, vocab):
     story_ID = 0 
     long_ending = 0 
 
-    for sentence in tqdm(endings_corpus, desc='Encoding Endings'):
+    for sentence in tqdm(endings_corpus, desc='Encoding Endings', position=0):
         # Reset pointer 
         token_ID = 0
 
@@ -465,7 +465,7 @@ def encode_valid_text_for_fine_tunning(corpus, labels, max_len, vocab):
     # Initialize the data matrix
     stories = np.full(shape=(no_stories, 5*max_len), fill_value=vocab['<pad>'], dtype=int)
 
-    for story_ID in tqdm(range(no_stories), desc='Encoding Stories for Finetunning'):
+    for story_ID in tqdm(range(no_stories), desc='Encoding Stories for Finetunning', position=0):
         # Reset pointer 
         token_ID = 0
 
