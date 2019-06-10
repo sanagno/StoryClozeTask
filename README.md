@@ -40,10 +40,10 @@ Team: 25
   make requirements
   ```
 - If running on leonhard cluster, load python and relevant dependencies:
-```
-module load gcc/4.8.5 python_gpu/3.6.4 hdf5 eth_proxy
-module load cudnn/7.2
-```
+  ```
+  module load gcc/4.8.5 python_gpu/3.6.4 hdf5 eth_proxy
+  module load cudnn/7.2
+  ```
 - Some experiments require skip thoughts embeddings as specified in the paper Skip-Thought Vectors (https://arxiv.org/abs/1506.06726 ,https://github.com/ryankiros/skip-thoughts). For time saving purposes these have been precomputed and are publicly available at https://polybox.ethz.ch/index.php/s/X3GsRxeIhATdt8J. They files saved have the form of a numpy array with a shape [num_samples, num_sentences, skip_thought_embeddings_size]. For the training set, each story has a total of 5 sentences, while for the validation and test set each story has 6 sentences (corresponding to the two possible endings). To install:
   ```
   make load_data
