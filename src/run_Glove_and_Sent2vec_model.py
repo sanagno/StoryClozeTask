@@ -31,7 +31,7 @@ import glove_and_sent2vec as gs
 nrows=10000
 train_corpus=pd.read_csv("data/ROCStories/train_stories.csv", nrows=nrows)
 val_corpus=pd.read_csv("data/ROCStories/cloze_test_val__spring2016 - cloze_test_ALL_val.csv", nrows=nrows)
-test=pd.read_csv("data/test_for_report-stories_labels.csv", nrows=nrows)
+test=pd.read_csv("data/ROCStories/test_for_report-stories_labels.csv", nrows=nrows)
 
 tagged_sentences=get_tagged_sentences(train_corpus,val_corpus)
 model=get_sent2vec_model(tagged_sentences,refit_model=True)

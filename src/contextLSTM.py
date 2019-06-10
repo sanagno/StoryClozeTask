@@ -92,7 +92,8 @@ class ContextLSTM(NLUModel):
         val_beg = val[:,:4,:]
         val_end_1 = val[:,4,:]
         val_end_2 = val[:,5,:]
-        y = np.load(LABELS)
+        data_test = pd.read_csv('./data/ROCStories/test_for_report-stories_labels.csv', header='infer')
+        y = data_test['AnswerRightEnding'].values
         return [val_beg, val_end_1, val_end_2], y
 
     def evaluate(self, true_y, pred_y):
@@ -101,9 +102,9 @@ class ContextLSTM(NLUModel):
 if __name__ == "__main__":
 
     cont_model = ContextLSTM()
-    trX, trY = cont_model.get_train_data()
+    trX, trY = cont_model.get_train_data(nrows=100)
     teX, teY = cont_model.get_test_data()
-    cont_model.fit(trX, trY, epochs=10)
+    cont_model.fit(trX, trY, epochs=1)
     y_pred = cont_model.predict(teX)
     score = cont_model.evaluate(teY, y_pred)
     print('ContextLSTM score (on test_set):', score)

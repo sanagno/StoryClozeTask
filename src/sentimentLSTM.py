@@ -144,9 +144,9 @@ class SentimentLSTM(NLUModel):
 if __name__  == "__main__":
 
     sent_model = SentimentLSTM()
-    trX, trY = sent_model.get_train_data()
+    trX, trY = sent_model.get_train_data(nrows=100)
     teX, teY = sent_model.get_test_data()
-    sent_model.fit(trX, trY, epochs=10)
+    sent_model.fit(trX, trY, epochs=1)
     y_pred = sent_model.predict(teX)
     score = sent_model.evaluate(teY, y_pred)
     print('SentimentLSTM score (on test_set):', score)
