@@ -22,7 +22,6 @@ import bert
 from tensorflow.keras.layers import *
 import sys
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 import os
 from load_embeddings import load_glove_model,load_glove_emb
 
