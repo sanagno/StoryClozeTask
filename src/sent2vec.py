@@ -41,11 +41,11 @@ def get_sent2vec_model(tag_sentences,load_path=None,refit_model=True):
   model = Doc2Vec.load(load_path)
   return model
 
-def get_sent2vec(tag_sentences,model):
+def get_sent2vec(tag_sentences,model,len_train=88161):
   
   """Take the tagged sentences and the sent2vec_model. Return the vector sentences for train and validation separately"""
   
-  len_train=88161
+  len_train=len_train
    
   sent2vec=np.array([model.docvecs[sentence] for sentence in range(len(tag_sentences))])
   sent2vec_train=sent2vec[:len_train*5].reshape(-1,5,model.vector_size)

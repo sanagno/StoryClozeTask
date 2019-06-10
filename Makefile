@@ -1,7 +1,8 @@
 # for hyperparameters selection options run relative python script with the flag -h (--help)
 help:
 	@echo  'Makefile options:'
-	@echo  '  load_data       - Loads skip-thoughts embeddings and glove embeddings'
+	@echo  '  setup           - Install requirements in the virtual environment.'
+	@echo  '                    Loads skip-thoughts embeddings and glove embeddings.'
 	@echo  '  run_bert        - Runs bert classifier. Creates best predictions for '
 	@echo  '                    labeled and unlabeled test set. '
 	@echo  '  run_simple      - Runs models of paper (https://www.aclweb.org/anthology/N18-2015).'
@@ -9,7 +10,8 @@ help:
 	@echo  ''
 
 # downloads glove 100d embeddings and skip thoughts for train validation and test sets
-load_data:
+setup:
+	pip install -r requirements.txt
 	cd data/glove-embeddings && \
 	wget https://nlp.stanford.edu/data/wordvecs/glove.6B.zip && \
 	unzip glove.6B.zip && \
@@ -38,7 +40,7 @@ run_simple:
 	BATCH_SIZE=32; \
 	LEARNING_RATE=1e-3; \
 	UNITS=4800; \
-	TRAIN_ON_VALIDATION=0; \
+	TRAIN_ON_VALIDATION=1; \
 	MODE="LS-skip"; \
 	if [ "$$TRAIN_ON_VALIDATION" -eq 0 ]; then \
 	    MEMORY=18000; \
@@ -56,4 +58,4 @@ run_predict_context:
 run_all:
 	run_bert
 
-.PHONY: load_data run_bert run_simple run_all
+.PHONY: help setup run_bert run_simple run_all
