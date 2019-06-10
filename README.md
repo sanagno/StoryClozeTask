@@ -39,15 +39,15 @@ Team: 25
   ```
 - Install requirements and skip thought embeddings. Some experiments require skip thoughts embeddings as specified in the paper Skip-Thought Vectors (https://arxiv.org/abs/1506.06726 ,https://github.com/ryankiros/skip-thoughts). For time saving purposes these have been precomputed and are publicly available at https://polybox.ethz.ch/index.php/s/X3GsRxeIhATdt8J. They files saved have the form of a numpy array with a shape [num_samples, num_sentences, skip_thought_embeddings_size]. For the training set, each story has a total of 5 sentences, while for the validation and test set each story has 6 sentences (corresponding to the two possible endings). To install:
   ```
-  make setup
+  run_experiments setup
   ```
 
 ## Run experiments
 
-Run `make help` to display all available options. 
+Run `run_experiments help` to display all available options. 
 
-Run `make run_all` to run all available models.
+Run `run_experiments all` to run all available models.
 
-Run `make run_bert` to run BERT classifier.
+Run `run_experiments bert` to run BERT classifier.
 
 
