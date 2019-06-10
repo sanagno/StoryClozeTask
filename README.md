@@ -17,7 +17,10 @@ Team: 25
 ## Project structure
 
     .
-    ├── data                                # Datasets (train, validation, test) 
+    ├── data                                
+    │   ├── glove-embeddings                # 100d glove embeddings 
+    │   ├── ROCStories                      # Datasets (train, validation, test)
+    │   ├── skip-thoughts                   # Skip thoughts embeddings for (train, validation, test)
     ├── results                             # Predictions for unlabeled test set
     ├── src                                 # Source files
     │   ├── bert                            # Files concerning running BERT classifier for the task.
