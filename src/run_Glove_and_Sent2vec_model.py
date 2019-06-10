@@ -28,7 +28,7 @@ from sent2vec import *
 import glove_and_sent2vec as gs
 
 # Sent2vec Model
-nrows=10000
+nrows=None
 train_corpus=pd.read_csv("data/ROCStories/train_stories.csv", nrows=nrows)
 val_corpus=pd.read_csv("data/ROCStories/cloze_test_val__spring2016 - cloze_test_ALL_val.csv", nrows=nrows)
 test=pd.read_csv("data/ROCStories/test_for_report-stories_labels.csv", nrows=nrows)
