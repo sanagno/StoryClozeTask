@@ -33,12 +33,6 @@ Team: 25
 ### Prerequisites
 
 - Install Python 3.6+
-- Install requirements
-  ```
-  # When executed in Leohnard cluster: https://scicomp.ethz.ch/wiki/Leonhard
-  module load gcc/4.8.5 python_gpu/3.6.4 hdf5 eth_proxy cudnn/7.2
-  make requirements
-  ```
 - Load modules and create virtual environment (works when running on eth leonhard cluster):
   ```
   source initialize.sh
