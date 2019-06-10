@@ -55,13 +55,12 @@ run_glove_and_sent2vec:
 run_word_based:
 	bsub -n 2 -W 4:00 -R "rusage[mem=2048, ngpus_excl_p=1]" python src/word_based_model.py
 
-run_all:
-	run_bert
-
 run_sentiment_analysis:
 	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" python src/sentimentLSTM.py
 
 run_predict_context:
 	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" -R "select[gpu_model0==TeslaV100_SXM2_32GB]" python contextLSTM.py
 
-.PHONY: help setup run_bert run_simple run_all run_glove_and_sent2vec
+run_all: run_bert run_simple run_glove_and_sent2vec run_word_based run_sentiment_analysis run_predict_context
+
+.PHONY: help setup run_bert run_simple run_glove_and_sent2vec run_word_based run_sentiment_analysis run_predict_context run_all
