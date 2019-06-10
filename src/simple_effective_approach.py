@@ -255,15 +255,15 @@ class SimpleAndEffectiveApproach(NLUModel):
         if not self.train_on_validation:
             data_train = pd.read_csv(os.path.join(flags.data_dir, ROC_TRAIN_SET), header='infer')
             # has a shape (88161, 5, 4800)
-            train_skip_thought = np.load(TRAIN_SKIP_THOUGHTS_EMBEDDINGS)
+            train_skip_thought = np.load(TRAIN_SKIP_THOUGHTS_EMBEDDINGS, allow_pickle=True)
 
         data_val = pd.read_csv(os.path.join(flags.data_dir, ROC_VAL_SET), header='infer')
         # has a shape (1871, 6, 4800)
-        validation_skip_thought = np.load(VAL_SKIP_THOUGHTS_EMBEDDINGS)
+        validation_skip_thought = np.load(VAL_SKIP_THOUGHTS_EMBEDDINGS, allow_pickle=True)
 
         data_test = pd.read_csv(os.path.join(flags.data_dir, ROC_TEST_SET), header='infer')
         # has a shape (1871, 6, 4800)
-        test_skip_thought = np.load(TEST_SKIP_THOUGHTS_EMBEDDINGS)
+        test_skip_thought = np.load(TEST_SKIP_THOUGHTS_EMBEDDINGS, allow_pickle=True)
 
         # create set for validation dataset
         val_embeddings, val_classes = create_dataset_from_embeddings(validation_skip_thought, data_val)
