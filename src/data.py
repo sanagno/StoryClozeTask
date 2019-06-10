@@ -62,10 +62,10 @@ def fetch_data():
         Validation labels indicating which ending is correct (1 or 2). 
     """
     # Load raw data 
-    train_stories = pd.read_csv('data/%s' %TRAIN_FILE, index_col=False)
+    train_stories = pd.read_csv('data/ROCStories/%s' %TRAIN_FILE, index_col=False)
 
-    valid_data = pd.read_csv('data/%s' %VALID_FILE, index_col=False)
-    test_data  = pd.read_csv('data/%s' %TEST_FILE,  index_col=False)
+    valid_data = pd.read_csv('data/ROCStories/%s' %VALID_FILE, index_col=False)
+    test_data  = pd.read_csv('data/ROCStories/%s' %TEST_FILE,  index_col=False)
     
     # Training stories
     train_stories = train_stories.drop('storyid', axis=1)
