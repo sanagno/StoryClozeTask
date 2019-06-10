@@ -49,13 +49,11 @@ run_simple:
 	fi; \
 	bsub -o lsf_simple_$${TRAIN_ON_VALIDATION}_$${MODE}_$${LEARNING_RATE}.out -n 2 -W 03:59 -R "rusage[mem=$${MEMORY},ngpus_excl_p=1]" python ./src/simple_effective_approach.py --data_dir /cluster/home/sanagnos/NLU/project2/data --log_path /scratch/$${USER}/log_path --num_epochs $${EPOCHS} --learning_rate $${LEARNING_RATE} --verbose True --train_on_validation $${TRAIN_ON_VALIDATION} --mode $${MODE} --batch_size $${BATCH_SIZE} --log_path $${LOG_PATH} --data_dir $${DATA_DIR}
 
-run_sentiment:
-	python src/sentimentLSTM.py
+run_glove_and_sent2vec:
+	bsub -n 2 -W 4:00 -R "rusage[mem=10000, ngpus_excl_p=1]" python src/run_Glove_and_Sent2vec_model.py
 
-run_predict_context:
-	python src/contextLSTM.py
 
 run_all:
 	run_bert
 
-.PHONY: help setup run_bert run_simple run_all
+.PHONY: help setup run_bert run_simple run_all run_glove_and_sent2vec
