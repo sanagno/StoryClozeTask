@@ -52,6 +52,8 @@ run_simple:
 run_glove_and_sent2vec:
 	bsub -n 2 -W 4:00 -R "rusage[mem=10000, ngpus_excl_p=1]" python src/run_Glove_and_Sent2vec_model.py
 
+run_word_based:
+	bsub -n 2 -W 4:00 -R "rusage[mem=2048, ngpus_excl_p=1]" python src/word_based_model.py
 
 run_all:
 	run_bert
