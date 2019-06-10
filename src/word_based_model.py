@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 
 # Custom dependencies 
 import data
+import os
 
 from model import NLUModel
 from utils import load_embedding
