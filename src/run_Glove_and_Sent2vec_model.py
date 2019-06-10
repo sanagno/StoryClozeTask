@@ -38,7 +38,7 @@ test=pd.read_csv("data/ROCStories/cloze_test_test__spring2016-cloze_test_ALL_tes
 
 tagged_sentences=get_tagged_sentences(train_corpus,val_corpus)
 model=get_sent2vec_model(tagged_sentences,refit_model=True)
-_,sent2vec_val=get_sent2vec(tagged_sentences,model)
+_,sent2vec_val=get_sent2vec(tagged_sentences,model,len_train=len(train_corpus))
 
 test_sent2vec=infer_sent2vec(test,model)
 
