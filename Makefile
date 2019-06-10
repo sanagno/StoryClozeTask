@@ -1,12 +1,16 @@
 # for hyperparameters selection options run relative python script with the flag -h (--help)
 help:
 	@echo  'Makefile options:'
-	@echo  '  setup           - Install requirements in the virtual environment.'
-	@echo  '                    Loads skip-thoughts embeddings and glove embeddings.'
-	@echo  '  run_bert        - Runs bert classifier. Creates best predictions for '
-	@echo  '                    labeled and unlabeled test set. '
-	@echo  '  run_simple      - Runs models of paper (https://www.aclweb.org/anthology/N18-2015).'
-	@echo  '                    A Simple and Effective Approach to the Story Cloze Test. '
+	@echo  '  setup           	 - Install requirements in the virtual environment.'
+	@echo  '                    	   Loads skip-thoughts embeddings and glove embeddings.'
+	@echo  '  run_bert	         - Runs bert classifier. Creates best predictions for '
+	@echo  '                           labeled and unlabeled test set. '
+	@echo  '  run_simple      	 - Runs models of paper (https://www.aclweb.org/anthology/N18-2015).'
+	@echo  ' 	                   A Simple and Effective Approach to the Story Cloze Test. '
+	@echo  '  run_word_based      	 - BiLSTM encoder and decoder with attention.'
+	@echo  '  run_glove_and_sent2vec - Runs model that combines glove and sent2vec representations.'
+	@echo  '  run_sentiment_analysis - Runs model that predicts polarity of the fifth sentence.'
+	@echo  '  run_predict_context  	 - Runs model that predicts the context of the fifth sentence.'
 	@echo  ''
 
 # downloads glove 100d embeddings and skip thoughts for train validation and test sets
