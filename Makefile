@@ -1,5 +1,15 @@
+# for hyperparameters selection options run relative python script with the flag -h (--help)
+help:
+	@echo  'Makefile options:'
+	@echo  '  load_data       - Loads skip-thoughts embeddings and glove embeddings'
+	@echo  '  run_bert        - Runs bert classifier. Creates best predictions for '
+	@echo  '                    labeled and unlabeled test set. '
+	@echo  '  run_simple      - Runs models of paper (https://www.aclweb.org/anthology/N18-2015).'
+	@echo  '                    A Simple and Effective Approach to the Story Cloze Test. '
+	@echo  ''
+
 # downloads glove 100d embeddings and skip thoughts for train validation and test sets
-create_data:
+load_data:
 	cd data/glove-embeddings && \
 	wget https://nlp.stanford.edu/data/wordvecs/glove.6B.zip && \
 	unzip glove.6B.zip && \
@@ -30,7 +40,7 @@ run_simple:
 	UNITS=4800; \
 	TRAIN_ON_VALIDATION=0; \
 	MODE="LS-skip"; \
-	if [ "$TRAIN_ON_VALIDATION" -eq 0 ]; then \
+	if [ "$$TRAIN_ON_VALIDATION" -eq 0 ]; then \
 	    MEMORY=18000; \
 	else \
 	    MEMORY=5000; \
@@ -40,4 +50,4 @@ run_simple:
 run_all:
 	run_bert
 
-.PHONY: create_data run_bert run_simple run_all
+.PHONY: load_data run_bert run_simple run_all
