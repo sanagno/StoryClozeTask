@@ -56,4 +56,10 @@ run_glove_and_sent2vec:
 run_all:
 	run_bert
 
+run_sentiment_analysis:
+	python src/sentimentLSTM.py
+
+run_predict_context:
+	python src/contextLSTM.py
+
 .PHONY: help setup run_bert run_simple run_all run_glove_and_sent2vec
