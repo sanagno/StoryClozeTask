@@ -40,11 +40,10 @@ _,sent2vec_val=get_sent2vec(tagged_sentences,model,len_train=len(train_corpus))
 test_sent2vec=infer_sent2vec(test,model)
 
 # Construct vocabulary for glove_embeddings
-dataloader = data.fetch_data(train_file=train_corpus,valid_file=val_corpus)
-dataloader2 = data.fetch_data(train_file=train_corpus,valid_file=test)
+dataloader = data.fetch_data()
 train_pos_stories = dataloader['train']
 valid_stories, valid_labels = dataloader['valid']
-test_stories, test_labels = dataloader2['valid']
+test_stories, test_labels = dataloader['test']
  
 vocab, _, max_len = data.construct_vocab(train_pos_stories)
 
