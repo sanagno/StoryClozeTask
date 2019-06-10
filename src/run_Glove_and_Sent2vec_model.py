@@ -21,9 +21,6 @@ import bert
 from tensorflow.keras.layers import *
 import sys
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-
-#custom dependencies
 
 import data
 from load_embeddings import load_glove_model,load_glove_emb
@@ -31,10 +28,10 @@ from sent2vec import *
 import glove_and_sent2vec as gs
 
 # Sent2vec Model
-nrows=None
+nrows=10000
 train_corpus=pd.read_csv("data/ROCStories/train_stories.csv", nrows=nrows)
 val_corpus=pd.read_csv("data/ROCStories/cloze_test_val__spring2016 - cloze_test_ALL_val.csv", nrows=nrows)
-test=pd.read_csv("data/ROCStories/cloze_test_test__spring2016-cloze_test_ALL_test.csv", nrows=nrows)
+test=pd.read_csv("data/test_for_report-stories_labels.csv", nrows=nrows)
 
 tagged_sentences=get_tagged_sentences(train_corpus,val_corpus)
 model=get_sent2vec_model(tagged_sentences,refit_model=True)
