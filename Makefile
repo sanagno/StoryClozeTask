@@ -14,16 +14,27 @@ help:
 	@echo  ''
 
 # downloads glove 100d embeddings and skip thoughts for train validation and test sets
-setup:
-	pip install -r requirements.txt
+setup: data/glove-embeddings/glove.6B.100d.txt data/skip-thoughts/skip-thoughts-embeddings_train.npy data/skip-thoughts/skip-thoughts-embeddings_validation.npy data/skip-thoughts/skip-thoughts-embeddings_test.npy
+	pip install -r requirements.txt 
+
+data/glove-embeddings/glove.6B.100d.txt:
 	cd data/glove-embeddings && \
-	wget https://nlp.stanford.edu/data/wordvecs/glove.6B.zip && \
-	unzip glove.6B.zip && \
-	rm glove.6B.zip glove.6B.200d.txt glove.6B.300d.txt glove.6B.50d.txt
+        wget https://nlp.stanford.edu/data/wordvecs/glove.6B.zip && \
+        unzip glove.6B.zip && \
+        rm glove.6B.zip glove.6B.200d.txt glove.6B.300d.txt glove.6B.50d.txt
+
+data/skip-thoughts/skip-thoughts-embeddings_train.npy:
 	cd data/skip-thoughts && \
-	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/NQ9OT8Xxvdxn3wo/download -O skip-thoughts-embeddings_train.npy && \
-	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/10CivpGpg8O1Bfe/download -O skip-thoughts-embeddings_validation.npy && \
-	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/PKQm7YuCMsPhBv6/download -O skip-thoughts-embeddings_test.npy
+        wget --no-check-certificate https://polybox.ethz.ch/index.php/s/NQ9OT8Xxvdxn3wo/download -O skip-thoughts-embeddings_train.npy
+
+data/skip-thoughts/skip-thoughts-embeddings_validation.npy:
+	cd data/skip-thoughts && \
+        wget --no-check-certificate https://polybox.ethz.ch/index.php/s/10CivpGpg8O1Bfe/download -O skip-thoughts-embeddings_validation.npy
+
+data/skip-thoughts/skip-thoughts-embeddings_test.npy:
+	cd data/skip-thoughts && \
+        wget --no-check-certificate https://polybox.ethz.ch/index.php/s/PKQm7YuCMsPhBv6/download -O skip-thoughts-embeddings_test.npy
+
 
 # runs: bert
 run_bert:
