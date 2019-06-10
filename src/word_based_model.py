@@ -13,7 +13,7 @@ from model import NLUModel
 from utils import load_embedding
 
 LOG_PATH = "./log/word_based/"
-EMB_PATH = "./data/glove/glove.6B.100d.txt"
+EMB_PATH = "./data/glove-embeddings/glove.6B.100d.txt"
 
 class WordBasedClassifier(NLUModel):
     """ Bidirectional LSTM Word-Based Classification Model """
