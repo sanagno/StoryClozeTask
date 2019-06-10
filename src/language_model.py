@@ -6,7 +6,7 @@ import tensorflow as tf
 from tqdm import tqdm 
 
 # Custom dependencies
-from data import decode_sentence
+import data 
 from utils import load_embedding
 
 LOG_PATH = "./log/language_model/"
@@ -412,7 +412,7 @@ class LanguageModel(object):
 
             states, next_token = session.run([self.one_step_new_state, self.one_step_next_word], feed_dict=feed_dict)
             
-        return decode_sentence(generated_story_ending.tolist(), self.inverse_vocab)
+        return data.decode_sentence(generated_story_ending.tolist(), self.inverse_vocab)
 
     def ending_generation(self, stories, true_endings):
         """
@@ -443,3 +443,40 @@ class LanguageModel(object):
                 endings.append(ending)
 
         return endings
+
+if __name__ == '__main__':
+
+    # Load data
+    dataloader = data.fetch_data()
+
+    train_stories = dataloader['train']
+    valid_stories, valid_labels = dataloader['valid']
+
+    # Construct the vocabulary
+    vocab, inverse_vocab, max_len = data.construct_vocab(train_stories)
+
+    encoded_train_context_, _ = data.encode_text(train_stories, max_len, vocab)
+
+    # Append max_len tokens to the training context (for consistency during training)
+    train_pads = np.full(shape=(encoded_train_context_.shape[0], max_len), fill_value=vocab['<pad>'], dtype=int)
+
+    encoded_train_context = np.hstack((encoded_train_context_, train_pads))
+
+    # Encode validation data for finetuning (context + wrong ending)
+    val_finetune_data = data.encode_valid_text_for_fine_tunning(valid_stories, valid_labels, max_len, vocab)
+
+    # Train the language model 
+    language_model = LanguageModel(vocab, inverse_vocab, max_len)
+    language_model.train(encoded_train_context, val_finetune_data)
+
+    # Encode training stories and correct endings for condintional generation
+    context_nopads, endings_nopad = data.encode_train_text_for_conditional_generation(train_stories, max_len, vocab)
+
+    # Generate negative endings 
+    generated_endings = language_model.ending_generation(context_nopads, endings_nopad)
+
+    # Save generated ending (in the same order as training stories)
+    np.save('data/incorrect_endings/lm_incorrect_endings.npy', generated_endings)
+
+
+
