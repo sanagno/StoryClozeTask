@@ -14,15 +14,11 @@ import shutil
 
 ROC_TRAIN_SET = 'train_stories.csv'
 ROC_VAL_SET = 'cloze_test_val__spring2016 - cloze_test_ALL_val.csv'
-ROC_TEST_SET = 'test_for_report-stories-labels.csv'
+ROC_TEST_SET = 'test_for_report-stories_labels.csv'
 
-TRAIN_SKIP_THOUGHTS_EMBEDDINGS = '/cluster/project/infk/courses/machine_perception_19/' \
-                                 'Sasglentamekaiedo/skip-thoughts-embbedings.npy'
-VAL_SKIP_THOUGHTS_EMBEDDINGS = '/cluster/project/infk/courses/machine_perception_19/' \
-                               'Sasglentamekaiedo/skip-thoughts-embbedings_validation.npy'
-TEST_SKIP_THOUGHTS_EMBEDDINGS = '/cluster/project/infk/courses/machine_perception_19/' \
-                                'Sasglentamekaiedo/skip-thoughts-embbedings_test.npy'
-
+TRAIN_SKIP_THOUGHTS_EMBEDDINGS = './data/skip-thoughts/skip-thoughts-embeddings_train.npy'
+VAL_SKIP_THOUGHTS_EMBEDDINGS = './data/skip-thoughts/skip-thoughts-embeddings_validation.npy'
+TEST_SKIP_THOUGHTS_EMBEDDINGS = './data/skip-thoughts/skip-thoughts-embeddings_test.npy'
 
 def create_dataset_from_embeddings(embeddings, df):
     """
@@ -504,8 +500,8 @@ def main(argv):
 
 if __name__ == '__main__':
 
-    tf.app.flags.DEFINE_string("log_path", "../log_path", "Path to logging directory")
-    tf.app.flags.DEFINE_string("data_dir", '../data/', "Where the training data is stored")
+    tf.app.flags.DEFINE_string("log_path", "./log_path", "Path to logging directory")
+    tf.app.flags.DEFINE_string("data_dir", './data/ROCStories/', "Where the training data is stored")
     tf.app.flags.DEFINE_integer("num_epochs", 5, "Number of epochs to run for")
     tf.app.flags.DEFINE_integer("batch_size", 64, "batch size")
     tf.app.flags.DEFINE_float("learning_rate", 1e-3, "learning rate")
