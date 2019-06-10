@@ -7,3 +7,4 @@ pip install --user virtualenvwrapper
 source $HOME/.local/bin/virtualenvwrapper.sh
 mkvirtualenv "nlu-project2"
 
+export PATH=$PATH:/$PWD
