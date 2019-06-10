@@ -44,4 +44,10 @@ Team: 25
 
 ## Run experiments
 
-Create specific running scripts (should merge cases that implement the nlu model)
+Run `make help` to display all available options. 
+
+Run `make run_all` to run all available models.
+
+Run `make run_bert` to run BERT classifier.
+
+
