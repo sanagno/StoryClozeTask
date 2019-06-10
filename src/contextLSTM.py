@@ -20,9 +20,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import accuracy_score
 from model import NLUModel
 
-ENCODINGS_TRAIN = '../../encodings_all.npy'
-ENCODINGS_VAL = '../../encodings_val.npy'
-LABELS = '../../labels.npy'
+# ENCODINGS_TRAIN = '../../encodings_all.npy'
+# ENCODINGS_VAL = '../../encodings_val.npy'
+# LABELS = '../../labels.npy'
+
+ENCODINGS_TRAIN = 'data/skip-thoughts/skip-thoughts-embeddings_train.npy'
+ENCODINGS_TEST = 'data/skip-thoughts/skip-thoughts-embeddings_test.npy'
+ENCODINGS_VAL = 'data/skip-thoughts/skip-thoughts-embeddings_validation.npy'
 
 class ContextLSTM(NLUModel):
 
@@ -84,10 +88,24 @@ class ContextLSTM(NLUModel):
 
 
     def get_test_data(self):
-        val = np.load(ENCODINGS_VAL)
+        val = np.load(ENCODINGS_TEST)
         val_beg = val[:,:4,:]
         val_end_1 = val[:,4,:]
         val_end_2 = val[:,5,:]
         y = np.load(LABELS)
         return [val_beg, val_end_1, val_end_2], y
+
+    def evaluate(self, true_y, pred_y):
+        return accuracy_score(true_y, pred_y)
+
+if __name__ == "__main__":
+
+    cont_model = ContextLSTM()
+    trX, trY = cont_model.get_train_data()
+    teX, teY = cont_model.get_test_data()
+    cont_model.fit(trX, trY, epochs=10)
+    y_pred = cont_model.predict(teX)
+    score = cont_model.evaluate(teY, y_pred)
+    print('ContextLSTM score (on test_set):', score)
+
 

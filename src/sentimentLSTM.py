@@ -19,9 +19,11 @@ from nltk import sent_tokenize
 import pandas as pd
 import numpy as np
 
-VAL_SET = 'test_for_report-stories_labels.csv' # Which is actually test set
+# VAL_SET = 'test_for_report-stories_labels.csv' # Which is actually test set
+TEST_SET = 'test_for_report-stories_labels.csv' # Which is actually test set
 ROC_VAL_SET = 'train_stories.csv'
-DATA_DIR = '../data'
+# DATA_DIR = '../data'
+DATA_DIR = 'data/ROCStories'
 
 from model import NLUModel
 analyzer = SentimentIntensityAnalyzer()
@@ -72,7 +74,7 @@ class SentimentLSTM(NLUModel):
 
     def fit(self, X, y, epochs=10, batch_size=16):
 
-        self.model.fit(X, y, batch_size=batch_size, epochs=epochs, validation_split=0.1)
+        self.model.fit(X, y, batch_size=batch_size, epochs=epochs, verbose=2, validation_split=0.1)
 
     def predict(self, X):
 
@@ -129,9 +131,24 @@ class SentimentLSTM(NLUModel):
         return X,y
 
     def get_test_data(self):
-        val_df = pd.read_csv(DATA_DIR + '/' + VAL_SET).drop(columns=['InputStoryid'])
+        val_df = pd.read_csv(DATA_DIR + '/' + TEST_SET).drop(columns=['InputStoryid'])
         X_test, answer1, answer2, y_test = self.prepare_test_dataset(val_df)
         return [X_test, answer1, answer2], y_test
 
+    def evaluate(self, true_y, pred_y):
+        return accuracy_score(true_y, pred_y)
+
+
+
+
+if __name__  == "__main__":
+
+    sent_model = SentimentLSTM()
+    trX, trY = sent_model.get_train_data()
+    teX, teY = sent_model.get_test_data()
+    sent_model.fit(trX, trY, epochs=10)
+    y_pred = sent_model.predict(teX)
+    score = sent_model.evaluate(teY, y_pred)
+    print('SentimentLSTM score (on test_set):', score)
 
 
