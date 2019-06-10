@@ -25,16 +25,16 @@ import matplotlib.pyplot as plt
 
 #custom dependencies
 
-import data2
+import data
 from load_embeddings import load_glove_model,load_glove_emb
 from sent2vec import *
 import glove_and_sent2vec as gs
 
 # Sent2vec Model
-
-train_corpus=pd.read_csv("train_stories.csv")
-val_corpus=pd.read_csv('cloze_test_val__spring2016 - cloze_test_ALL_val.csv')
-test=pd.read_csv("cloze_test_test__spring2016-cloze_test_ALL_test.csv")
+nrows=None
+train_corpus=pd.read_csv("data/ROCStories/train_stories.csv", nrows=nrows)
+val_corpus=pd.read_csv("data/ROCStories/cloze_test_val__spring2016 - cloze_test_ALL_val.csv", nrows=nrows)
+test=pd.read_csv("data/ROCStories/cloze_test_test__spring2016-cloze_test_ALL_test.csv", nrows=nrows)
 
 tagged_sentences=get_tagged_sentences(train_corpus,val_corpus)
 model=get_sent2vec_model(tagged_sentences,refit_model=True)
@@ -43,17 +43,17 @@ _,sent2vec_val=get_sent2vec(tagged_sentences,model)
 test_sent2vec=infer_sent2vec(test,model)
 
 # Construct vocabulary for glove_embeddings
-dataloader = data2.fetch_data(train_file=train_corpus,valid_file=val_corpus)
-dataloader2 = data2.fetch_data(train_file=train_corpus,valid_file=test)
+dataloader = data.fetch_data(train_file=train_corpus,valid_file=val_corpus)
+dataloader2 = data.fetch_data(train_file=train_corpus,valid_file=test)
 train_pos_stories = dataloader['train']
 valid_stories, valid_labels = dataloader['valid']
 test_stories, test_labels = dataloader2['valid']
  
-vocab, _, max_len = data2.construct_vocab(train_pos_stories)
+vocab, _, max_len = data.construct_vocab(train_pos_stories)
 
 #encode data
-encoded_valid_stories = data2.encode_text(valid_stories, max_len, vocab)
-encoded_test_stories = data2.encode_text(test_stories, max_len, vocab)
+encoded_valid_stories = np.concatenate(data.encode_text(valid_stories, max_len, vocab),axis=1)
+encoded_test_stories = np.concatanate(data.encode_text(test_stories, max_len, vocab),axis=1)
 
 #construct the glove_and_sent2vec model
 tf.reset_default_graph()
@@ -61,7 +61,7 @@ com=gs.Glove_and_Sent2vec(vocab, max_len,embedding_dim=100,drop_rate=0.3,hidden_
 
 #train the model
 com.train(encoded_valid_stories,sent2vec_val, valid_labels,encoded_test_stories,test_sent2vec,test_labels,
-          glove_path="glove.6B.100d.txt", epochs=8,
+          glove_path="data/glove-embeddings/glove.6B.100d.txt", epochs=8,
           optimizer='adam', learning_rate=1e-4, batch_size=64, shuffle=True)
 
 #evaluate
