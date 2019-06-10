@@ -21,8 +21,6 @@ import bert
 from tensorflow.keras.layers import *
 import sys
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-
 #custom dependencies
 
 import data
