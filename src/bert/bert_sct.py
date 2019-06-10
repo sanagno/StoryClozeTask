@@ -884,7 +884,7 @@ if __name__ == '__main__':
                                "where the training data is stored")
     tf.app.flags.DEFINE_string("val_file_name", "cloze_test_val__spring2016 - cloze_test_ALL_val.csv",
                                "name of the validation file")
-    tf.app.flags.DEFINE_string("test_file_name", "test_for_report-stories-labels.csv",
+    tf.app.flags.DEFINE_string("test_file_name", "test_for_report-stories_labels.csv",
                                "name of the original test cloze file")
     tf.app.flags.DEFINE_string("provided_test_file_name", "test-stories.csv",
                                "name of the provided test file")

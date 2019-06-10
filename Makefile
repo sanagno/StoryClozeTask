@@ -23,12 +23,12 @@ setup:
 
 # runs: bert
 run_bert:
-	EPOCHS=1; \
+	EPOCHS=5; \
 	DATA_DIR="./data/ROCStories"; \
 	PERCENTAGE_SYNONYMS=0.2; \
 	NETWORK=bidirectional-1024-1-1-True-lstm:highway-3; \
 	LEARNING_RATE=2e-5; \
-	NUM_ESTIMATORS=1; \
+	NUM_ESTIMATORS=10; \
 	bsub -n 2 -W 03:59 -R "rusage[mem=12000,ngpus_excl_p=1]" -R "select[gpu_model0==TeslaV100_SXM2_32GB]" -o lsf_bert.out python ./src/bert/bert_sct.py --data_dir $${DATA_DIR} --output_dir /scratch/$${USER}/output_dir --tfhub_cache_dir /scratch/$${USER}/tfhub_cache_dir --num_epochs $${EPOCHS} --learning_rate $${LEARNING_RATE} --num_estimators $${NUM_ESTIMATORS} --network $${NETWORK} --percentage_synonyms $${PERCENTAGE_SYNONYMS} --save_results_dir ./bert_predictions_$${EPOCHS}_$${PERCENTAGE_SYNONYMS}_$${NETWORK}
 
 # runs: A Simple and Effective Approach to the Story Cloze Test
