@@ -59,7 +59,7 @@ run_sentiment_analysis:
 	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" -o lsf_run_sentiment_analysis.out python src/sentimentLSTM.py
 
 run_predict_context:
-	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" -R "select[gpu_model0==TeslaV100_SXM2_32GB]" -o lsf_run_predict_context.out python contextLSTM.py
+	bsub -n 1 -W 8:00 -R "rusage[mem=64192, ngpus_excl_p=1]" -R "select[gpu_model0==TeslaV100_SXM2_32GB]" -o lsf_run_predict_context.out python src/contextLSTM.py
 
 run_all: run_bert run_simple run_glove_and_sent2vec run_word_based run_sentiment_analysis run_predict_context
 
