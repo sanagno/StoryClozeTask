@@ -28,7 +28,7 @@ from load_embeddings import load_glove_model,load_glove_emb
 
 class Glove_and_Sent2vec():
   
-  def __init__(self, vocab, sentence_len, drop_rate=0.5, batch_norm=False, embedding_dim=100, hidden_size=128,sent2vec_size=500,tune_embds=True):
+  def __init__(self, vocab, sentence_len, drop_rate=0.5, batch_norm=False, embedding_dim=100, hidden_size=128,hidden_size_sent2vec=256,sent2vec_size=500,tune_embds=True):
 
       self.vocab = vocab.copy()
       self.vocab_size = len(vocab)
@@ -44,7 +44,7 @@ class Glove_and_Sent2vec():
       #sent2vec
       self.num_sentences=5
       self.sentence_size=sent2vec_size
-      
+      self.hidden_size_sent2vec=hidden_size_sent2vec
 
       # Training indicator 
       self.training = tf.placeholder(dtype=tf.bool, shape=[], name="training_flag")
@@ -104,7 +104,7 @@ class Glove_and_Sent2vec():
       
       with tf.variable_scope("Sent2vec_BidLSTM"):
    
-        lstm_cell=LSTM(256,kernel_initializer='he_normal')
+        lstm_cell=LSTM(self.hidden_size_sent2vec,kernel_initializer='he_normal')
         
         self.last_state=Bidirectional(lstm_cell,merge_mode='concat')(self.doc)
         
