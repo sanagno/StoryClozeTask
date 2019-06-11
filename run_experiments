@@ -39,7 +39,6 @@ function _sct_setup {
     fi
     cd ../..
     
-    
     cd data/skip-thoughts
     if [ ! -f skip-thoughts-embeddings_train.npy ]; then
 	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/NQ9OT8Xxvdxn3wo/download -O skip-thoughts-embeddings_train.npy
