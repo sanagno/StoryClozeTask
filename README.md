@@ -25,6 +25,7 @@ Team: 25
     ├── src                                 # Source files
     │   ├── bert                            # Files concerning running BERT classifier for the task.
     │   ├── create_skip_thoughts_embeddings # Script to create skip thoughts embeddings.
+    ├── report                              # Report pdf
     └── README.md
     
     
