@@ -1,9 +1,8 @@
 # StoryClozeTask
 
-This project is part of the Natural Languange Understanding course (2019) in ETH.
+This project is part of the Natural Languange Understanding course (2019) at ETH.
 
 Task: Find the best ending for a story (https://arxiv.org/abs/1604.01696).
-
 
 Team: 25 
 
@@ -54,4 +53,5 @@ Run `run_experiments bert` to run BERT classifier.
 ## Results
 The predcitions of the best performing model can be found in the results folder. Each line contains a number, 1 or 2, which corresponds the prediction of the model for the correct ending sentence.
 
-
+## Documentation
+[Report](https://github.com/SotirisAnagnostidis/StoryClozeTask/blob/master/report/report.pdf) 
