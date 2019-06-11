@@ -16,6 +16,7 @@ function _sct_help {
 
 function _sct_setup {
     pip install -r requirements.txt 
+    python -c 'import nltk; nltk.download("punkt"); nltk.download("averaged_perceptron_tagger"); nltk.download("stopwords"); nltk.download("wordnet");'
     
     if [ ! -f data/glove-embeddings/glove.6B.100d.txt ]; then
 	echo "Downloading glove embeddings..."
