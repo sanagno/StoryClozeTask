@@ -5,12 +5,12 @@ function _sct_help {
 	echo  '    setup		  	 - Install requirements in the virtual environment.'
 	echo  '                                   Loads skip-thoughts embeddings and glove embeddings.'
 	echo  ''
-	echo  '    run_bert			 - Runs bert classifier. Creates best predictions for labeled and unlabeled test set. '
-	echo  '    run_simple			 - Runs models of paper FC-skip and LS-skip.'
-	echo  '    run_word_based		 - BiLSTM encoder and decoder with attention.'
-	echo  '    run_sentiment_analysis	 - Runs model that predicts polarity of the fifth sentence.'
-	echo  '    run_predict_context  	 - Runs model that predicts the context of the fifth sentence.'
-	echo  '    run_all			 - Runs model that predicts the context of the fifth sentence.'
+	echo  '    bert  			 - Runs bert classifier. Creates best predictions for labeled and unlabeled test set. '
+	echo  '    simple			 - Runs models of paper FC-skip and LS-skip.'
+	echo  '    word_based   		 - BiLSTM encoder and decoder with attention.'
+	echo  '    sentiment_analysis   	 - Runs model that predicts polarity of the fifth sentence.'
+	echo  '    predict_context  	         - Runs model that predicts the context of the fifth sentence.'
+	echo  '    all			         - Runs model that predicts the context of the fifth sentence.'
 	echo  ''
 }
 
