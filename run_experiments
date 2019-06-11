@@ -27,6 +27,19 @@ function _sct_setup {
 	cd ../..
     fi
     
+    cd data/ROCStories
+    if [ ! -f train_stories.csv ]; then
+	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/l2wM4RIyI3pD7Tl/download -O train_stories.csv
+    fi
+    if [ ! -f "cloze_test_val__spring2016 - cloze_test_ALL_val.csv" ]; then
+	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/02IVLdBAgVcsJAx/download -O "cloze_test_val__spring2016 - cloze_test_ALL_val.csv"
+    fi
+    if [ ! -f test-stories.csv ]; then
+	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/C9sYaIebnJnHlqi/download -O test-stories.csv
+    fi
+    cd ../..
+    
+    
     cd data/skip-thoughts
     if [ ! -f skip-thoughts-embeddings_train.npy ]; then
 	wget --no-check-certificate https://polybox.ethz.ch/index.php/s/NQ9OT8Xxvdxn3wo/download -O skip-thoughts-embeddings_train.npy
