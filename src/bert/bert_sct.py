@@ -316,7 +316,7 @@ def single_weight(inputs, segment_ids, weight_size):
     return output_layer_last_sentence
 
 
-def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, num_layers_bw, only_last_sentence,
+def bidirectional(inputs, segment_ids, input_mask, hidden_size_rnn, num_layers_fw, num_layers_bw, only_last_sentence,
                   cell_type):
     """
     Adds a bidirectional layer on top of the previous output
@@ -326,7 +326,7 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, n
     inputs:                 intermediate input with shape [BATCH_SIZE, SEQUENCE_LENGTH, intemrediate_output_size]
     segment_ids:            specified by bert
     input_mask:             specified by bert
-    hidden_size:            hidden size for the rnn used
+    hidden_size_rnn:        hidden size for the rnn used
     num_layers_fw:          number of layers for the foward cell type chosen
     num_layers_bw:          number of layers for the backward cell type chosen
     only_last_sentence:     whether to take into accoun only the last sentence
