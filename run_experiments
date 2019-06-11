@@ -8,7 +8,6 @@ function _sct_help {
 	echo  '    run_bert			 - Runs bert classifier. Creates best predictions for labeled and unlabeled test set. '
 	echo  '    run_simple			 - Runs models of paper FC-skip and LS-skip.'
 	echo  '    run_word_based		 - BiLSTM encoder and decoder with attention.'
-	echo  '    run_glove_and_sent2vec	 - Runs model that combines glove and sent2vec representations.'
 	echo  '    run_sentiment_analysis	 - Runs model that predicts polarity of the fifth sentence.'
 	echo  '    run_predict_context  	 - Runs model that predicts the context of the fifth sentence.'
 	echo  '    run_all			 - Runs model that predicts the context of the fifth sentence.'
@@ -69,10 +68,6 @@ function _sct_simple {
     bsub -o lsf_simple_${TRAIN_ON_VALIDATION}_${MODE}_${LEARNING_RATE}.out -n 2 -W 03:59 -R "rusage[mem=${MEMORY},ngpus_excl_p=1]" python ./src/simple_effective_approach.py --data_dir /cluster/home/sanagnos/NLU/project2/data --log_path /scratch/${USER}/log_path --num_epochs ${EPOCHS} --learning_rate ${LEARNING_RATE} --verbose True --train_on_validation ${TRAIN_ON_VALIDATION} --mode ${MODE} --batch_size ${BATCH_SIZE} --log_path ${LOG_PATH} --data_dir ${DATA_DIR}
 }
 
-function _sct_glove_and_sent2vec {
-    bsub -n 2 -W 4:00 -R "rusage[mem=10000, ngpus_excl_p=1]" -o lsf_run_glove_and_sent2vec.out python src/run_Glove_and_Sent2vec_model.py
-}
-
 function _sct_word_based {
     bsub -n 2 -W 4:00 -R "rusage[mem=2048, ngpus_excl_p=1]" -o lsf_run_word_based.out python src/word_based_model.py
 }
@@ -88,7 +83,6 @@ function _sct_predict_context {
 function _sct_all {
     eval _sct_bert
     eval _sct_simple
-    eval _sct_glove_and_sent2vec
     eval _sct_word_based
     eval _sct_sentiment_analysis
     eval _sct_predict_context
