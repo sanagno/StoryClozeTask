@@ -20,7 +20,8 @@
 
 from sklearn.metrics import accuracy_score
 
-class NLUModel():
+
+class NLUModel:
 
     def __init__(self, name):
         self.name = name

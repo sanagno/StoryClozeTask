@@ -8,9 +8,6 @@ Original file is located at
 """
 
 import numpy as np
-import pandas as pd
-from gensim.models import Word2Vec
-from sklearn.utils import shuffle
 from gensim.models import Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from gensim.utils import simple_preprocess

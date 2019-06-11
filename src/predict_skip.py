@@ -4,17 +4,9 @@
 import tensorflow as tf
 import pandas as pd
 import numpy as np
-import csv, os
-from sklearn.model_selection import train_test_split
-from keras.preprocessing.text import Tokenizer, text_to_word_sequence
-from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Input, Dropout, Lambda, GRU, Softmax
-from keras.layers import Flatten, Concatenate, TimeDistributed, Layer
-from keras.optimizers import SGD, Adam
-from keras.losses import categorical_crossentropy, sparse_categorical_crossentropy
 import keras.backend as KB
-from sklearn.model_selection import train_test_split
 from sklearn.metrics.pairwise import cosine_similarity
 
 from sklearn.metrics import accuracy_score
@@ -27,6 +19,7 @@ from model import NLUModel
 ENCODINGS_TRAIN = 'data/skip-thoughts/skip-thoughts-embeddings_train.npy'
 ENCODINGS_TEST = 'data/skip-thoughts/skip-thoughts-embeddings_test.npy'
 ENCODINGS_VAL = 'data/skip-thoughts/skip-thoughts-embeddings_validation.npy'
+
 
 class ContextLSTM(NLUModel):
 

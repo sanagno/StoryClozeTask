@@ -8,22 +8,10 @@ Original file is located at
 """
 
 import tensorflow as tf
-import tensorflow_hub as hub
 import numpy as np
 import pandas as pd
-from gensim.models import Word2Vec
-from sklearn.metrics import accuracy_score,confusion_matrix
-from sklearn.utils import shuffle
-from gensim.models import Doc2Vec
-from gensim.models.doc2vec import TaggedDocument
-from gensim.utils import simple_preprocess
-import bert
-from tensorflow.keras.layers import *
-import sys
-from tqdm import tqdm
 
 import data
-from load_embeddings import load_glove_model,load_glove_emb
 from sent2vec import *
 import glove_and_sent2vec as gs
 

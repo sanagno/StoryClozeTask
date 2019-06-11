@@ -5,17 +5,11 @@
 # https://arxiv.org/pdf/1811.00625.pdf
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import roc_auc_score,accuracy_score
-from sklearn.model_selection import train_test_split
 from keras.layers import LSTM, Dropout, Dense
 import keras.backend as K
 from keras.models import Sequential
-from nltk import sent_tokenize
 import pandas as pd
 import numpy as np
 
