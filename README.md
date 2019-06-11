@@ -51,4 +51,7 @@ Run `run_experiments all` to run all available models.
 
 Run `run_experiments bert` to run BERT classifier.
 
+## Results
+The predcitions of the best performing model can be found in the results folder. Each line contains a number, 1 or 2, which corresponds the prediction of the model for the correct ending sentence.
+
 
