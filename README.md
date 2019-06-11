@@ -19,6 +19,7 @@ Team: 25
     ├── data                                
     │   ├── glove-embeddings                # 100d glove embeddings 
     │   ├── ROCStories                      # Datasets (train, validation, test)
+    │   ├── incorrect_endings               # negative endings generated from the language model
     │   ├── skip-thoughts                   # Skip thoughts embeddings for (train, validation, test)
     ├── results                             # Predictions for unlabeled test set
     ├── src                                 # Source files
