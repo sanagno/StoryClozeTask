@@ -336,17 +336,19 @@ def bidirectional(inputs, segment_ids, input_mask, hidden_size, num_layers_fw, n
     assert len(inputs.shape) == 3, "shape for input in single_weight should be [BATCH_SIZE, SEQUENCE_LENGTH, " \
                                    "intermediate_output_size] "
 
+    hidden_size = inputs.shape[-1].value
+    
     if only_last_sentence:
         # keep only the outputs that correspond to the last sentence
         inputs = inputs * tf.tile(
             tf.expand_dims(tf.cast(segment_ids, tf.float32), 2), [1, 1, hidden_size])
 
     if cell_type == 'gru':
-        cells_fw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_fw)]
-        cells_bw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size) for _ in range(num_layers_bw)]
+        cells_fw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size_rnn) for _ in range(num_layers_fw)]
+        cells_bw = [tf.nn.rnn_cell.GRUCell(num_units=hidden_size_rnn) for _ in range(num_layers_bw)]
     elif cell_type == 'lstm':
-        cells_fw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size) for _ in range(num_layers_fw)]
-        cells_bw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size) for _ in range(num_layers_bw)]
+        cells_fw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size_rnn) for _ in range(num_layers_fw)]
+        cells_bw = [tf.nn.rnn_cell.LSTMCell(num_units=hidden_size_rnn) for _ in range(num_layers_bw)]
     else:
         print('RNN cell type', cell_type, 'not supported')
         sys.exit(1)
