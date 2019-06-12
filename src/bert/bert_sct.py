@@ -267,6 +267,9 @@ def get_indices_of_last_sentence(segment_ids, input_mask, keep_story_context=Fal
     index_of_first_token = tf.stack([tf_range, index_of_first_token], axis=1)
     index_of_last_token = tf.stack([tf_range, index_of_last_token], axis=1)
 
+    # backwards rnn should have the inverse index
+    index_of_first_token = flags.max_seq_length - index_of_first_token - 1
+    
     return index_of_first_token, index_of_last_token
 
 
